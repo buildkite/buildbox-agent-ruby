@@ -10,7 +10,7 @@ module CI
     end
 
     def cd(dir)
-      @dir = dir
+      @dir = File.expand_path(dir)
       yield self
     ensure
       @dir = nil
