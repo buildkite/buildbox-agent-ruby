@@ -58,7 +58,7 @@ module CI
       end
 
       # output may be invalid UTF-8, as it is produced by the build command.
-      # output = CI::UTF8.clean(output)
+      output = CI::UTF8.clean(output)
 
       CI::Result.new($?.success?, output.chomp)
     end
