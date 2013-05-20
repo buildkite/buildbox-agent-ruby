@@ -2,35 +2,33 @@ module CI
   class Client
     def initialize(options)
       @options  = options
+      @interval = 5
     end
 
     def start
       CI.logger.info "Starting CI Client..."
 
       exit_if_already_running
-      Process.daemon if @options[:daemon]
-
-      set_program_name
-      trap_int_signals
+      daemonize if @options[:daemon]
       pid_file.save
 
       loop do
-        process_build_queue
-
-        sleep 5
+        process_build_queue && sleep(@interval)
       end
     ensure
       pid_file.delete
     end
 
     def stop
+      CI.logger.info "Stopping CI Client..."
+
       Process.kill(:KILL, pid_file.delete)
     end
 
     private
 
-    def set_program_name
-      $PROGRAM_NAME = "ci"
+    def daemonize
+      Process.daemon if @options[:daemon]
     end
 
     def process_build_queue
@@ -45,10 +43,6 @@ module CI
 
         exit 1
       end
-    end
-
-    def trap_int_signals
-      Signal.trap(:INT) { stop }
     end
 
     def api
