@@ -101,7 +101,7 @@ describe CI::Command do
 
     it "captures color'd output" do
       chunked_output = ''
-      result = command.run("rspec #{File.join SUPPORT_PATH, 'rspec', 'test_spec.rb'}") do |chunk|
+      result = command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')}") do |chunk|
         chunked_output += chunk
       end
 

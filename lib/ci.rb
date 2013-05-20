@@ -15,4 +15,8 @@ module CI
 
     Pathname.new(path)
   end
+
+  def self.logger
+    @logger ||= Logger.new(STDOUT)
+  end
 end

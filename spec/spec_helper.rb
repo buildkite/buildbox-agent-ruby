@@ -1,7 +1,10 @@
 require 'ci'
 
-SUPPORT_PATH = File.expand_path('../support', __FILE__)
-TEMP_PATH    = File.expand_path('../tmp', __FILE__)
+SPEC_PATH     = Pathname.new(File.expand_path('..', __FILE__))
+FIXTURES_PATH = SPEC_PATH.join('fixtures')
+TEMP_PATH     = SPEC_PATH.join('tmp')
+
+Dir[SPEC_PATH.join("support/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
   # Run specs in random order to surface order dependencies. If you find an

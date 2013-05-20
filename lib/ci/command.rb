@@ -10,7 +10,8 @@ module CI
     end
 
     def run(command)
-      # CI.logger.debug(command)
+      CI.logger.debug(command)
+
       output = ""
       read_io, write_io, pid = nil
 
@@ -57,7 +58,6 @@ module CI
       result = run(command)
 
       unless result.success
-        # CI.logger.error(result.output.inspect)
         raise Error, "Failed to run '#{command}': #{result.output}"
       end
 

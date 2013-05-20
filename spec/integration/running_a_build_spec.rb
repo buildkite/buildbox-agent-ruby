@@ -1,17 +1,16 @@
 require 'spec_helper'
 
 describe 'running a build' do
-  let(:root_path) { Pathname.new(TEMP_PATH) }
   let(:commit)    { "3e0c65433b241ff2c59220f80bcdcd2ebb7e4b96" }
   let(:command)   { "rspec test_spec.rb" }
-  let(:build)     { CI::Build.new(:project_id => 1, :build_id => 1, :repo => File.join(SUPPORT_PATH, "repo.git"), :commit => commit, :command => command) }
+  let(:build)     { CI::Build.new(:project_id => 1, :build_id => 1, :repo => FIXTURES_PATH.join("repo.git").to_s, :commit => commit, :command => command) }
 
   before do
-    CI.stub(:root_path).and_return(root_path)
+    CI.stub(:root_path).and_return(TEMP_PATH)
   end
 
   after do
-    root_path.rmtree if root_path.exist?
+    TEMP_PATH.rmtree if TEMP_PATH.exist?
   end
 
   context 'running a working build' do
