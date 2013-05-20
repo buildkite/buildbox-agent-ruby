@@ -4,6 +4,7 @@ require "ci/logger"
 require "ci/result"
 require "ci/build"
 require "ci/version"
+require "ci/client"
 
 module CI
   require 'fileutils'

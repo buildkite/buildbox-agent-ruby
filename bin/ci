@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(dir) unless $LOAD_PATH.include?(dir)
+require 'ci'
+require 'optparse'
+
+options = {}.tap do |options|
+  OptionParser.new do |opts|
+    opts.version = CI::VERSION
+    opts.banner  = 'Usage: ci [options]'
+
+    opts.separator ""
+    opts.separator "Options:"
+
+    opts.on("-d", "--daemon", "Runs CI as a daemon") do |user_agent|
+      options[:daemon] = true
+    end
+
+  end.parse!
+end
+
+CI::Client.new(options).start
