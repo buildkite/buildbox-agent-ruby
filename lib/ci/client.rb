@@ -6,17 +6,20 @@ module CI
     end
 
     def start
+      exit_if_already_running
+
       CI.logger.info "Starting CI Client..."
 
-      exit_if_already_running
-      daemonize if @options[:daemon]
-      pid_file.save
+      begin
+        daemonize if @options[:daemon]
+        pid_file.save
 
-      loop do
-        process_build_queue && sleep(@interval)
+        loop do
+          process_build_queue && sleep(@interval)
+        end
+      ensure
+        pid_file.delete
       end
-    ensure
-      pid_file.delete
     end
 
     def stop
