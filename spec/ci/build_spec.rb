@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe CI::Build do
-  let(:build) { CI::Build.new(1, 2, "git@github.com:keithpitt/ci-ruby.git", "67b15b704e0", "rspec") }
+  let(:build) { CI::Build.new(:project_id => 1, :build_id => 2, :repo => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
 
   describe "#start" do
     let(:build_path) { double }

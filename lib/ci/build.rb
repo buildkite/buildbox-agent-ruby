@@ -1,11 +1,11 @@
 module CI
   class Build
-    def initialize(project_id, build_id, repo, commit, command)
-      @project_id = project_id
-      @build_id   = build_id
-      @repo       = repo
-      @commit     = commit
-      @command    = command
+    def initialize(options)
+      @project_id = options[:project_id]
+      @build_id   = options[:build_id]
+      @repo       = options[:repo]
+      @commit     = options[:commit]
+      @command    = options[:command]
     end
 
     def start(&block)
