@@ -26,7 +26,7 @@ module CI
 
       write_io.close
 
-      while true
+      loop do
         fds, = IO.select([read_io], nil, nil, @read_interval)
         if fds
           # should have some data to read

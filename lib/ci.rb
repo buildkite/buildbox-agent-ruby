@@ -5,6 +5,9 @@ require "ci/result"
 require "ci/build"
 require "ci/version"
 require "ci/client"
+require "ci/api"
+require "ci/worker"
+require "ci/pid_file"
 
 module CI
   require 'fileutils'

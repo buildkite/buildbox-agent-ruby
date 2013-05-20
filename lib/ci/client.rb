@@ -1,41 +1,49 @@
 module CI
   class Client
     def initialize(options)
-      @options      = options
-      @pidfile_path = CI.root_path.join("ci.pid")
+      @options  = options
     end
 
     def start
       CI.logger.info "Starting CI Client..."
 
       exit_if_already_running
-      daemonize if @options[:daemon]
+      Process.daemon if @options[:daemon]
 
+      set_program_name
       trap_int_signals
-      write_pid_to_disk
+      pid_file.save
 
       loop do
-        p 'watching...'
+        process_build_queue
 
         sleep 5
       end
+    ensure
+      pid_file.delete
     end
 
     def stop
-      shutdown_process_from_pid
-      remove_pid_from_disk
+      pid = pid_file.read
+      pid_file.delete
+
+      Process.kill(:KILL, pid)
     end
 
     private
 
-    def shutdown_process_from_pid
-      pid = File.readlines(@pidfile_path).first.to_i
+    def set_program_name
+      $PROGRAM_NAME = "ci"
+    end
 
-      Process.kill(:TERM, pid)
+    def process_build_queue
+      build = api.queue.first
+
+      CI::Worker.new(build, api).run if build
     end
 
     def exit_if_already_running
-      if File.exist?(@pidfile_path)
+      if pid_file.exist?
         CI.logger.error "CI is already running. Found a pidfile at `#{@pidfile_path}`"
 
         exit 1
@@ -48,16 +56,12 @@ module CI
       end
     end
 
-    def daemonize
-      Process.daemon
+    def api
+      @api ||= CI::API.new
     end
 
-    def remove_pid_from_disk
-      File.delete(@pidfile_path)
-    end
-
-    def write_pid_to_disk
-      File.open(@pidfile_path, 'w+') { |file| file.write(Process.pid.to_s) }
+    def pid_file
+      @pid_file ||= CI::PidFile.new
     end
   end
 end
