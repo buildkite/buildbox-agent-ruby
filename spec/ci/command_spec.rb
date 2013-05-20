@@ -57,7 +57,7 @@ describe CI::Command do
 
       result.should be_success
       result.output.should == 'hello world'
-      chunked_output.should == "hello world\n"
+      chunked_output.should == "hello world\r\n"
     end
 
     it "can collect chunks at paticular intervals" do
@@ -70,7 +70,7 @@ describe CI::Command do
 
       result.should be_success
       result.output.should == 'hello world'
-      chunked_output.should == "hello world\n"
+      chunked_output.should == "hello world\r\n"
     end
 
     it "can collect chunks from within a thread" do
@@ -85,14 +85,14 @@ describe CI::Command do
       worker_thread.run
       sleep(0.5)
       result.should be_nil
-      chunked_output.should == "before sleep\n"
+      chunked_output.should == "before sleep\r\n"
 
       worker_thread.join
 
       result.should_not be_nil
       result.should be_success
-      result.output.should == "before sleep\nafter sleep"
-      chunked_output.should == "before sleep\nafter sleep\n"
+      result.output.should == "before sleep\r\nafter sleep"
+      chunked_output.should == "before sleep\r\nafter sleep\r\n"
     end
 
     it 'returns a result when running an invalid command in a thread' do
@@ -105,10 +105,21 @@ describe CI::Command do
       thread.join
 
       result.should_not be_success
-      result.output.should =~ /No such file or directory - sillycommandlololol/
+      result.output.should =~ /No such file or directory - fork failed/
 
       second_result.should_not be_success
       second_result.output.should =~ /sh: doesntexist.rb: command not found/
+    end
+
+    it "captures color'd output" do
+      chunked_output = ''
+      result = command.run("rspec #{File.join SUPPORT_PATH, 'rspec', 'test_spec.rb'}") do |chunk|
+        chunked_output += chunk
+      end
+
+      result.should be_success
+      result.output.should include("\e[32m")
+      chunked_output.should include("\e[32m")
     end
   end
 end

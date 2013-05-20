@@ -34,14 +34,18 @@ command = CI::Command.new(logger)
 t = Thread.new do
   command = CI::Command.new(logger)
   command.cd "~/Development/mailmask" do
-    third_result = command.run "blah" do |chunk|
+    third_result = command.run %{echo "\e[31mHello Stackoverflow\e[0m"} do |chunk|
       print ansi_color_codes(chunk)
     end
   end
 end
 
 [ f, s, t ].each &:join
+# [ f ].each &:join
+
+require 'rubygems'
+require 'bcat'
 
 File.open('test.html', 'w+') do |f|
-  f.write ansi_color_codes(first_result.output)
+  f.write Bcat::ANSI.new(first_result.output).to_html
 end

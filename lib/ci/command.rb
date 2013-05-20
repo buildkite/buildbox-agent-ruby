@@ -1,8 +1,7 @@
-# The CI::Command module was stolen from Integrity
-# https://github.com/integrity/integrity/blob/master/lib/integrity/command_runner.rb
-
 module CI
   class Command
+    require 'pty'
+
     class Error < StandardError; end
     def initialize(logger, build_output_interval=nil)
       @logger = logger
@@ -10,37 +9,32 @@ module CI
     end
 
     def cd(dir)
-      @dir = File.expand_path(dir)
-      yield self
-    ensure
-      @dir = nil
+      dir = File.expand_path(dir)
+
+      Dir.chdir(dir) do
+        yield self
+      end
     end
 
     def run(command)
       @logger.debug(command)
-
       output = ""
-      rd, wr = IO.pipe
 
-      pid = fork do
-        rd.close
-        STDOUT.reopen(wr)
-        wr.close
-        STDERR.reopen(STDOUT)
-        if @dir
-          Dir.chdir(@dir)
-        end
-        exec(command)
+      begin
+        # spawn the process in a pseudo terminal so colors out outputted
+        read_io, write_io, pid = PTY.spawn(command)
+      rescue Errno::ENOENT => e
+        return CI::Result.new(false, e.message)
       end
 
-      wr.close
+      write_io.close
 
       while true
-        fds, = IO.select([rd], nil, nil, @build_output_interval)
+        fds, = IO.select([read_io], nil, nil, @build_output_interval)
         if fds
           # should have some data to read
           begin
-            chunk = rd.read_nonblock(10240)
+            chunk = read_io.read_nonblock(10240)
             if block_given?
               yield chunk
             end
@@ -54,7 +48,7 @@ module CI
         # if fds are empty, timeout expired - run another iteration
       end
 
-      rd.close
+      read_io.close
       Process.waitpid(pid)
 
       # output may be invalid UTF-8, as it is produced by the build command.
