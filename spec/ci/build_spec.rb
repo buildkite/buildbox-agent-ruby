@@ -24,6 +24,12 @@ describe CI::Build do
         build.start
       end
 
+      it "creates a folder for the build" do
+        root_path.should_receive(:join).with('1-git-github-com-keithpitt-ci-ruby-git')
+
+        build.start
+      end
+
       it "clones the repo" do
         command.should_receive(:run!).with(%{git clone "git@github.com:keithpitt/ci-ruby.git" .}).once
 

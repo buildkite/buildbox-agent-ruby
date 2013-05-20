@@ -1,6 +1,7 @@
 require 'ci'
 
 SUPPORT_PATH = File.expand_path('../support', __FILE__)
+TEMP_PATH    = File.expand_path('../tmp', __FILE__)
 
 RSpec.configure do |config|
   # Run specs in random order to surface order dependencies. If you find an

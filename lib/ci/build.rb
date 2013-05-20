@@ -38,9 +38,7 @@ module CI
     end
 
     def folder_name
-      name = @repo.match(/:(.+).git/)[1]
-
-      "#{@project_id}-#{name.gsub(/\//, '-')}"
+      "#{@project_id}-#{@repo.gsub(/[^a-zA-Z0-9]/, '-')}"
     end
 
     def command
