@@ -22,31 +22,7 @@ module CI
       output = ""
       rd, wr = IO.pipe
 
-      if pid = fork
-        # parent
-        wr.close
-        while true
-          fds, = IO.select([rd], nil, nil, @build_output_interval)
-          if fds
-            # should have some data to read
-            begin
-              chunk = rd.read_nonblock(10240)
-              if block_given?
-                yield chunk
-              end
-              output += chunk
-            rescue Errno::EAGAIN, Errno::EWOULDBLOCK
-              # do select again
-            rescue EOFError
-              break
-            end
-          end
-          # if fds are empty, timeout expired - run another iteration
-        end
-        rd.close
-        Process.waitpid(pid)
-      else
-        # child
+      pid = fork do
         rd.close
         STDOUT.reopen(wr)
         wr.close
@@ -56,6 +32,30 @@ module CI
         end
         exec(command)
       end
+
+      wr.close
+
+      while true
+        fds, = IO.select([rd], nil, nil, @build_output_interval)
+        if fds
+          # should have some data to read
+          begin
+            chunk = rd.read_nonblock(10240)
+            if block_given?
+              yield chunk
+            end
+            output += chunk
+          rescue Errno::EAGAIN, Errno::EWOULDBLOCK
+            # do select again
+          rescue EOFError
+            break
+          end
+        end
+        # if fds are empty, timeout expired - run another iteration
+      end
+
+      rd.close
+      Process.waitpid(pid)
 
       # output may be invalid UTF-8, as it is produced by the build command.
       output = CI::UTF8.clean(output)

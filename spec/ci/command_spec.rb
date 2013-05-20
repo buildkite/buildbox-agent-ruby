@@ -94,5 +94,21 @@ describe CI::Command do
       result.output.should == "before sleep\nafter sleep"
       chunked_output.should == "before sleep\nafter sleep\n"
     end
+
+    it 'returns a result when running an invalid command in a thread' do
+      result = nil
+      second_result = nil
+      thread = Thread.new do
+        result = command.run('sillycommandlololol')
+        second_result = command.run('export FOO=bar; doesntexist.rb')
+      end
+      thread.join
+
+      result.should_not be_success
+      result.output.should =~ /No such file or directory - sillycommandlololol/
+
+      second_result.should_not be_success
+      second_result.output.should =~ /sh: doesntexist.rb: command not found/
+    end
   end
 end
