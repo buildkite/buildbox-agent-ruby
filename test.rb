@@ -6,7 +6,6 @@ logger = Logger.new(STDOUT)
 
 # thanks integrity!
 def ansi_color_codes(string)
-  return
   string.gsub("\e[0m", '</span>').
     gsub(/\e\[(\d+)m/, "<span class=\"color\\1\">")
 end
@@ -32,11 +31,16 @@ s = Thread.new do
 end
 
 command = CI::Command.new(logger)
-third_result = command.run "asdf" do |chunk|
-  print ansi_color_codes(chunk)
+t = Thread.new do
+  command = CI::Command.new(logger)
+  command.cd "~/Development/mailmask" do
+    third_result = command.run "blah" do |chunk|
+      print ansi_color_codes(chunk)
+    end
+  end
 end
 
-puts third_result.output
+[ f, s, t ].each &:join
 
 File.open('test.html', 'w+') do |f|
   f.write ansi_color_codes(first_result.output)
