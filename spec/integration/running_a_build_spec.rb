@@ -44,4 +44,45 @@ describe 'running a build' do
       result.output.should == "sh: foobar: command not found"
     end
   end
+
+  context 'running multiple builds in a row' do
+    it "returns a successfull result when the build passes" do
+      first_result  = build.start
+      second_result = build.start
+
+      first_result.should be_success
+      first_result.output.should =~ /1 example, 0 failures/
+
+      second_result.should be_success
+      second_result.output.should =~ /1 example, 0 failures/
+    end
+  end
+
+  context 'running a working build from a thread' do
+    it "returns a successfull result" do
+      result = nil
+      thread = Thread.new do
+        result = build.start
+      end
+      thread.join
+
+      result.should be_success
+      result.output.should =~ /1 example, 0 failures/
+    end
+  end
+
+  context 'running a failing build from a thread' do
+    let(:commit) { "2d762cdfd781dc4077c9f27a18969efbd186363c" }
+
+    it "returns a successfull result" do
+      result = nil
+      thread = Thread.new do
+        result = build.start
+      end
+      thread.join
+
+      result.should_not be_success
+      result.output.should =~ /1 example, 1 failure/
+    end
+  end
 end
