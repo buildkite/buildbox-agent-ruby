@@ -1,19 +1,7 @@
 require "spec_helper"
 
 describe CI::Command do
-  let(:logger)  { Logger.new('/dev/null') }
-  let(:command) { CI::Command.new(logger) }
-
-  describe "#cd" do
-    it "changes the directory of the command" do
-      command.cd "~/" do
-        result = command.run('pwd')
-
-        result.should be_success
-        result.output.should == File.expand_path("~/")
-      end
-    end
-  end
+  let(:command) { CI::Command.new }
 
   describe "#run" do
     it "successfully runs and returns the output from a simple comment" do
@@ -61,7 +49,7 @@ describe CI::Command do
     end
 
     it "can collect chunks at paticular intervals" do
-      command = CI::Command.new(logger, 0.1)
+      command = CI::Command.new(nil, 0.1)
 
       chunked_output = ''
       result = command.run('sleep 0.5; echo hello world') do |chunk|
@@ -105,7 +93,7 @@ describe CI::Command do
       thread.join
 
       result.should_not be_success
-      result.output.should =~ /No such file or directory - fork failed/
+      result.output.should =~ /sh: sillycommandlololol: command not found/
 
       second_result.should_not be_success
       second_result.output.should =~ /sh: doesntexist.rb: command not found/

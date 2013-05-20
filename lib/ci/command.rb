@@ -3,26 +3,22 @@ module CI
     require 'pty'
 
     class Error < StandardError; end
-    def initialize(logger, build_output_interval=nil)
-      @logger = logger
-      @build_output_interval = build_output_interval || 5
-    end
 
-    def cd(dir)
-      dir = File.expand_path(dir)
-
-      Dir.chdir(dir) do
-        yield self
-      end
+    def initialize(path = nil, read_interval = nil)
+      @path          = path || "."
+      @read_interval = read_interval || 5
     end
 
     def run(command)
-      @logger.debug(command)
+      # CI.logger.debug(command)
       output = ""
+      read_io, write_io, pid = nil
 
       begin
+        dir = File.expand_path(@path)
+
         # spawn the process in a pseudo terminal so colors out outputted
-        read_io, write_io, pid = PTY.spawn(command)
+        read_io, write_io, pid = PTY.spawn("cd #{dir} && #{command}")
       rescue Errno::ENOENT => e
         return CI::Result.new(false, e.message)
       end
@@ -30,7 +26,7 @@ module CI
       write_io.close
 
       while true
-        fds, = IO.select([read_io], nil, nil, @build_output_interval)
+        fds, = IO.select([read_io], nil, nil, @read_interval)
         if fds
           # should have some data to read
           begin
@@ -61,7 +57,7 @@ module CI
       result = run(command)
 
       unless result.success
-        @logger.error(result.output.inspect)
+        # CI.logger.error(result.output.inspect)
         raise Error, "Failed to run '#{command}': #{result.output}"
       end
 

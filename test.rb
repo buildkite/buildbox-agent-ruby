@@ -6,46 +6,26 @@ logger = Logger.new(STDOUT)
 
 # thanks integrity!
 def ansi_color_codes(string)
-  string.gsub("\e[0m", '</span>').
-    gsub(/\e\[(\d+)m/, "<span class=\"color\\1\">")
+  string.gsub("\e[0m", '').
+    gsub(/\e\[(\d+)m/, "")
 end
 
-first_result = nil
 f = Thread.new do
-  command = CI::Command.new(logger)
-  command.cd "~/Development/mailmask-ruby" do
-    first_result = command.run "rspec" do |chunk|
-      print ansi_color_codes(chunk)
-    end
+  build = CI::Build.new(1, 1, "git@github.com:keithpitt/mailmask-ruby.git", "741205178cf3749a23bd0780d4a432372d601013", "rspec")
+  result = build.start do |output|
+    print ansi_color_codes(output)
   end
+
+  # p result
 end
 
-second_result = nil
 s = Thread.new do
-  command = CI::Command.new(logger)
-  command.cd "~/Development/mailmask" do
-    second_result = command.run "bundle exec rake" do |chunk|
-      print ansi_color_codes(chunk)
-    end
+  build2 = CI::Build.new(2, 2, "git@github.com:compactcode/mailmask.git", "67b15b704e04e2b40c1498bbb9d2a0a6608f8d16", "bundle && bundle exec rake")
+  result = build2.start do |output|
+    print ansi_color_codes(output)
   end
+
+  p result
 end
 
-command = CI::Command.new(logger)
-t = Thread.new do
-  command = CI::Command.new(logger)
-  command.cd "~/Development/mailmask" do
-    third_result = command.run %{echo "\e[31mHello Stackoverflow\e[0m"} do |chunk|
-      print ansi_color_codes(chunk)
-    end
-  end
-end
-
-[ f, s, t ].each &:join
-# [ f ].each &:join
-
-require 'rubygems'
-require 'bcat'
-
-File.open('test.html', 'w+') do |f|
-  f.write Bcat::ANSI.new(first_result.output).to_html
-end
+[ f, s ].each &:join
