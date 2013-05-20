@@ -8,7 +8,7 @@ module CI
       CI.root_path.join("ci.pid")
     end
 
-    def read
+    def pid
       File.readlines(path).first.to_i
     end
 
@@ -17,7 +17,9 @@ module CI
     end
 
     def delete
+      value = pid
       File.delete(path)
+      value
     end
   end
 end

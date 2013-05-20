@@ -24,10 +24,7 @@ module CI
     end
 
     def stop
-      pid = pid_file.read
-      pid_file.delete
-
-      Process.kill(:KILL, pid)
+      Process.kill(:KILL, pid_file.delete)
     end
 
     private
@@ -44,16 +41,14 @@ module CI
 
     def exit_if_already_running
       if pid_file.exist?
-        CI.logger.error "CI is already running. Found a pidfile at `#{@pidfile_path}`"
+        CI.logger.error "Process (#{pid_file.pid} - #{pid_file.path}) is already running."
 
         exit 1
       end
     end
 
     def trap_int_signals
-      Signal.trap(:INT) do
-        stop
-      end
+      Signal.trap(:INT) { stop }
     end
 
     def api
