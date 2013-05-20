@@ -5,10 +5,12 @@ $LOAD_PATH.unshift(dir) unless $LOAD_PATH.include?(dir)
 require 'ci'
 require 'optparse'
 
+COMMANDS = %w(start stop)
+
 options = {}.tap do |options|
   OptionParser.new do |opts|
     opts.version = CI::VERSION
-    opts.banner  = 'Usage: ci [options]'
+    opts.banner  = 'Usage: ci command [options]'
 
     opts.separator ""
     opts.separator "Options:"
@@ -20,4 +22,10 @@ options = {}.tap do |options|
   end.parse!
 end
 
-CI::Client.new(options).start
+client = CI::Client.new(options)
+
+if command = ARGV[0]
+  client.public_send(command)
+else
+  abort 'No command specified'
+end
