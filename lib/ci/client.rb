@@ -8,14 +8,17 @@ module CI
     def start
       exit_if_already_running
 
-      CI.logger.info "Starting CI Client..."
+      CI.logger.info "Starting client..."
 
       begin
         daemonize if @options[:daemon]
         pid_file.save
 
         loop do
-          process_build_queue && sleep(@interval)
+          process_build_queue
+
+          CI.logger.info "Sleeping for #{@interval} seconds"
+          sleep(@interval)
         end
       ensure
         pid_file.delete
@@ -23,7 +26,7 @@ module CI
     end
 
     def stop
-      CI.logger.info "Stopping CI Client..."
+      CI.logger.info "Stopping client..."
 
       Process.kill(:KILL, pid_file.delete)
     end
@@ -31,7 +34,11 @@ module CI
     private
 
     def daemonize
-      Process.daemon if @options[:daemon]
+      if @options[:daemon]
+        Process.daemon
+
+        CI.logger = Logger.new(CI.root_path.join("ci.log"))
+      end
     end
 
     def process_build_queue
