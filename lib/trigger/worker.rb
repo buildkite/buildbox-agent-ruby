@@ -1,4 +1,4 @@
-module CI
+module Trigger
   class Worker
     def initialize(build, api)
       @build = build

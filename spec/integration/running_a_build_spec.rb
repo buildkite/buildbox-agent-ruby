@@ -3,10 +3,10 @@ require 'spec_helper'
 describe 'running a build' do
   let(:commit)    { "3e0c65433b241ff2c59220f80bcdcd2ebb7e4b96" }
   let(:command)   { "rspec test_spec.rb" }
-  let(:build)     { CI::Build.new(:project_id => 1, :build_id => 1, :repo => FIXTURES_PATH.join("repo.git").to_s, :commit => commit, :command => command) }
+  let(:build)     { Trigger::Build.new(:project_id => 1, :build_id => 1, :repo => FIXTURES_PATH.join("repo.git").to_s, :commit => commit, :command => command) }
 
   before do
-    CI.stub(:root_path).and_return(TEMP_PATH)
+    Trigger.stub(:root_path).and_return(TEMP_PATH)
   end
 
   after do

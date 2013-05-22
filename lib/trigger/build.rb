@@ -1,4 +1,4 @@
-module CI
+module Trigger
   class Build
     def initialize(options)
       @project_id = options[:project_id]
@@ -34,7 +34,7 @@ module CI
     end
 
     def build_path
-      CI.root_path.join folder_name
+      Trigger.root_path.join folder_name
     end
 
     def folder_name
@@ -42,7 +42,7 @@ module CI
     end
 
     def command
-      CI::Command.new(build_path)
+      Trigger::Command.new(build_path)
     end
   end
 end

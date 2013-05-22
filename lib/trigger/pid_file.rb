@@ -1,11 +1,11 @@
-module CI
+module Trigger
   class PidFile
     def exist?
       File.exist?(path)
     end
 
     def path
-      CI.root_path.join("ci.pid")
+      Trigger.root_path.join("ci.pid")
     end
 
     def pid

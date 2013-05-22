@@ -1,4 +1,4 @@
-module CI
+module Trigger
   class Command
     require 'pty'
 
@@ -10,7 +10,7 @@ module CI
     end
 
     def run(command)
-      CI.logger.debug(command)
+      Trigger.logger.debug(command)
 
       output = ""
       read_io, write_io, pid = nil
@@ -21,7 +21,7 @@ module CI
         # spawn the process in a pseudo terminal so colors out outputted
         read_io, write_io, pid = PTY.spawn("cd #{dir} && #{command}")
       rescue Errno::ENOENT => e
-        return CI::Result.new(false, e.message)
+        return Trigger::Result.new(false, e.message)
       end
 
       write_io.close
@@ -49,9 +49,9 @@ module CI
       Process.waitpid(pid)
 
       # output may be invalid UTF-8, as it is produced by the build command.
-      output = CI::UTF8.clean(output)
+      output = Trigger::UTF8.clean(output)
 
-      CI::Result.new($?.success?, output.chomp)
+      Trigger::Result.new($?.success?, output.chomp)
     end
 
     def run!(command)

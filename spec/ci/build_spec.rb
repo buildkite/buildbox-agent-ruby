@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe CI::Build do
-  let(:build) { CI::Build.new(:project_id => 1, :build_id => 2, :repo => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
+describe Trigger::Build do
+  let(:build) { Trigger::Build.new(:project_id => 1, :build_id => 2, :repo => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
 
   describe "#start" do
     let(:build_path) { double }
@@ -9,8 +9,8 @@ describe CI::Build do
     let(:command)    { double(:run => true, :run! => true) }
 
     before do
-      CI.stub(:root_path => root_path)
-      CI::Command.stub(:new => command)
+      Trigger.stub(:root_path => root_path)
+      Trigger::Command.stub(:new => command)
     end
 
     context "with a new checkout" do
