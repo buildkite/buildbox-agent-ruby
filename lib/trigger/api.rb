@@ -4,7 +4,7 @@ module Trigger
       @i = 0
     end
 
-    def queue
+    def scheduled
       @i += 1
 
       if @i == 2

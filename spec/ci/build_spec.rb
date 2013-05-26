@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Trigger::Build do
-  let(:build) { Trigger::Build.new(:project_id => 1, :build_id => 2, :repo => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
+  let(:build) { Trigger::Build.new(:uuid => '1234', :repo => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
 
   describe "#start" do
     let(:build_path) { double }
@@ -25,7 +25,7 @@ describe Trigger::Build do
       end
 
       it "creates a folder for the build" do
-        root_path.should_receive(:join).with('1-git-github-com-keithpitt-ci-ruby-git')
+        root_path.should_receive(:join).with('git-github-com-keithpitt-ci-ruby-git')
 
         build.start
       end

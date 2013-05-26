@@ -1,8 +1,7 @@
 module Trigger
   class Build
     def initialize(options)
-      @project_id = options[:project_id]
-      @build_id   = options[:build_id]
+      @uuid       = options[:uuid]
       @repo       = options[:repo]
       @commit     = options[:commit]
       @command    = options[:command]
@@ -38,7 +37,7 @@ module Trigger
     end
 
     def folder_name
-      "#{@project_id}-#{@repo.gsub(/[^a-zA-Z0-9]/, '-')}"
+      @repo.gsub(/[^a-zA-Z0-9]/, '-')
     end
 
     def command

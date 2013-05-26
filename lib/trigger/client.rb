@@ -42,7 +42,7 @@ module Trigger
     end
 
     def process_build_queue
-      build = api.queue.first
+      build = api.scheduled.first
 
       Trigger::Worker.new(build, api).run if build
     end
