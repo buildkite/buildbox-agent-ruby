@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe trigger do
+describe Trigger do
   describe ".configure" do
     it "allows you to pass a block to configure Trigger" do
       Trigger.configure do |config|
