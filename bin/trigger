@@ -22,6 +22,11 @@ options = {}.tap do |options|
   end.parse!
 end
 
+Trigger.configure do |config|
+  config.endpoint = "api.triggerci.dev"
+  config.use_ssl  = false
+end
+
 client = Trigger::Client.new(options)
 
 if command = ARGV[0]
