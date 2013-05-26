@@ -1,5 +1,7 @@
 module Trigger
   class Build
+    attr_reader :uuid
+
     def initialize(options)
       @uuid       = options[:uuid]
       @repo       = options[:repo]

@@ -7,17 +7,12 @@ module Trigger
     def initialize
     end
 
+    def update(build)
+      response = post("repos/a8001481-3bb9-4034-915f-569f6ca664b5/builds/#{build.uuid}")
+    end
+
     def scheduled
-      uri              = endpoint_uri("repos/a8001481-3bb9-4034-915f-569f6ca664b5/builds/scheduled")
-      http             = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl     = uri.scheme == "https"
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-      request      = Net::HTTP::Get.new(uri.request_uri, { 'Content-Type' =>'application/json' })
-      # request      = Net::HTTP::Post.new(uri.request_uri, { 'Content-Type' =>'application/json' })
-      # request.body = JSON.generate(post_data)
-
-      response = http.request(request)
+      response = get("repos/a8001481-3bb9-4034-915f-569f6ca664b5/builds/scheduled")
       json     = JSON.parse(response.body)
 
       json['response']['builds'].map do |build|
@@ -28,8 +23,26 @@ module Trigger
 
     private
 
-    def endpoint_uri(path)
-      URI.parse(endpoint(path))
+    def http(uri)
+      Net::HTTP.new(uri.host, uri.port).tap do |http|
+        http.use_ssl     = uri.scheme == "https"
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
+    end
+
+    def get(path)
+      uri     = URI.parse(endpoint(path))
+      request = Net::HTTP::Get.new(uri.request_uri)
+
+      http(uri).request(request)
+    end
+
+    def put(path, data)
+      uri     = URI.parse(endpoint(path))
+      request = Net::HTTP::Put.new(uri.request_uri, { 'Content-Type' =>'application/json' })
+      request.set_form_data data
+
+      http(uri).request(request)
     end
 
     def endpoint(path)
