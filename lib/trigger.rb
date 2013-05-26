@@ -7,24 +7,34 @@ require "trigger/client"
 require "trigger/api"
 require "trigger/worker"
 require "trigger/pid_file"
+require "trigger/configuration"
 
 module Trigger
   require 'fileutils'
   require 'pathname'
   require 'logger'
 
-  def self.root_path
-    path = Pathname.new File.join(ENV['HOME'], ".trigger")
-    path.mkpath unless path.exist?
+  class << self
+    attr_accessor :configuration
 
-    Pathname.new(path)
-  end
+    def configure
+      self.configuration ||= Configuration.new
+      yield(configuration)
+    end
 
-  def self.logger=(logger)
-    @logger = logger
-  end
+    def root_path
+      path = Pathname.new File.join(ENV['HOME'], ".trigger")
+      path.mkpath unless path.exist?
 
-  def self.logger
-    @logger ||= Logger.new(STDOUT)
+      Pathname.new(path)
+    end
+
+    def logger=(logger)
+      @logger = logger
+    end
+
+    def logger
+      @logger ||= Logger.new(STDOUT)
+    end
   end
 end
