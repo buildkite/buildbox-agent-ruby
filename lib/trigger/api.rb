@@ -4,11 +4,8 @@ module Trigger
     require 'openssl'
     require 'json'
 
-    def initialize
-    end
-
-    def update(build)
-      response = post("repos/a8001481-3bb9-4034-915f-569f6ca664b5/builds/#{build.uuid}")
+    def update(build, data)
+      put("repos/a8001481-3bb9-4034-915f-569f6ca664b5/builds/#{build.uuid}", normalize_data('build' => data))
     end
 
     def scheduled
@@ -17,7 +14,7 @@ module Trigger
 
       json['response']['builds'].map do |build|
         # really smelly way of converting keys to symbols
-        Build.new(Hash[build.map{ |k, v| [k.to_sym, v] }])
+        Build.new(symbolize_keys(build))
       end
     end
 
@@ -39,15 +36,35 @@ module Trigger
 
     def put(path, data)
       uri     = URI.parse(endpoint(path))
-      request = Net::HTTP::Put.new(uri.request_uri, { 'Content-Type' =>'application/json' })
+      request = Net::HTTP::Put.new(uri.request_uri)
       request.set_form_data data
 
-      http(uri).request(request)
+      response = http(uri).request(request)
+      raise response.body unless response.code.to_i == 200
+      response
     end
 
     def endpoint(path)
       (Trigger.configuration.use_ssl ? "https://" : "http://") +
         "#{Trigger.configuration.endpoint}/v#{Trigger.configuration.api_version}/#{path}"
+    end
+
+    def symbolize_keys(hash)
+      Hash[hash.map{ |k, v| [k.to_sym, v] }]
+    end
+
+    def normalize_data(hash)
+      hash.inject({}) do |target, member|
+        key, value = member
+
+        if value.kind_of?(Hash)
+          value.each { |key2, value2| target["#{key}[#{key2}]"] = value2.to_s }
+        else
+          target[key] = value.to_s
+        end
+
+        target
+      end
     end
   end
 end

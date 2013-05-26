@@ -6,7 +6,7 @@ module Trigger
       @uuid       = options[:uuid]
       @repo       = options[:repo]
       @commit     = options[:commit]
-      @command    = options[:command]
+      @command    = options[:command] || "bundle && rspec"
     end
 
     def start(&block)

@@ -6,9 +6,20 @@ module Trigger
     end
 
     def run
-      result = @build.start
-      p result.output
-      p result.success
+      update(:started_at => Time.now)
+
+      chunks = ""
+      result = @build.start do |chunk|
+        update(:output => chunks += chunk)
+      end
+
+      update(:output => result.output, :finished_at => Time.now)
+    end
+
+    private
+
+    def update(data)
+      @api.update(@build, data)
     end
   end
 end
