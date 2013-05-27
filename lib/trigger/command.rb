@@ -51,13 +51,13 @@ module Trigger
       # output may be invalid UTF-8, as it is produced by the build command.
       output = Trigger::UTF8.clean(output)
 
-      Trigger::Result.new($?.success?, output.chomp)
+      Trigger::Result.new(output.chomp, $?.exitstatus)
     end
 
     def run!(command)
       result = run(command)
 
-      unless result.success
+      unless result.success?
         raise Error, "Failed to run '#{command}': #{result.output}"
       end
 

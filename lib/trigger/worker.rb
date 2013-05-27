@@ -13,7 +13,7 @@ module Trigger
         update(:output => chunks += chunk)
       end
 
-      update(:output => result.output, :finished_at => Time.now)
+      update(:exit_status => result.exit_status, :output => result.output, :finished_at => Time.now)
     end
 
     private
