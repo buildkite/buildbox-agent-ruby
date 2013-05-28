@@ -5,17 +5,23 @@ module Trigger
     require 'json'
 
     def update(build, data)
-      put("repos/a8001481-3bb9-4034-915f-569f6ca664b5/builds/#{build.uuid}", normalize_data('build' => data))
+      put("repos/#{build.repository_uuid}/builds/#{build.uuid}", normalize_data('build' => data))
     end
 
-    def scheduled
-      response = get("repos/a8001481-3bb9-4034-915f-569f6ca664b5/builds/scheduled")
-      json     = JSON.parse(response.body)
+    def scheduled(options = {})
+      builds = []
 
-      json['response']['builds'].map do |build|
-        # really smelly way of converting keys to symbols
-        Build.new(symbolize_keys(build))
+      options[:repositories].each do |repository|
+        response = get("repos/#{repository}/builds/scheduled")
+        json     = JSON.parse(response.body)
+
+        json['response']['builds'].map do |build|
+          # really smelly way of converting keys to symbols
+          builds << Build.new(symbolize_keys(build).merge(:repository_uuid => repository))
+        end
       end
+
+      builds
     end
 
     private
@@ -31,6 +37,8 @@ module Trigger
       uri     = URI.parse(endpoint(path))
       request = Net::HTTP::Get.new(uri.request_uri)
 
+      Trigger.logger.debug "GET #{uri}"
+
       http(uri).request(request)
     end
 
@@ -38,6 +46,8 @@ module Trigger
       uri     = URI.parse(endpoint(path))
       request = Net::HTTP::Put.new(uri.request_uri)
       request.set_form_data data
+
+      Trigger.logger.debug "PUT #{uri}"
 
       response = http(uri).request(request)
       raise response.body unless response.code.to_i == 200

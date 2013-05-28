@@ -15,11 +15,8 @@ module Trigger
   require 'logger'
 
   class << self
-    attr_accessor :configuration
-
-    def configure
-      self.configuration ||= Configuration.new
-      yield(configuration)
+    def configuration
+      @configuration ||= Configuration.load
     end
 
     def root_path

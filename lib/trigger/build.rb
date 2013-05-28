@@ -1,12 +1,13 @@
 module Trigger
   class Build
-    attr_reader :uuid
+    attr_reader :uuid, :repository_uuid
 
     def initialize(options)
-      @uuid       = options[:uuid]
-      @repo       = options[:repo]
-      @commit     = options[:commit]
-      @command    = options[:command] || "bundle && rspec"
+      @uuid            = options[:uuid]
+      @repo            = options[:repo]
+      @commit          = options[:commit]
+      @repository_uuid = options[:repository_uuid]
+      @command         = options[:command] || "bundle && rspec"
     end
 
     def start(&block)

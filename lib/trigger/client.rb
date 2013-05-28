@@ -15,10 +15,9 @@ module Trigger
         pid_file.save
 
         loop do
+          reload_configuration
           process_build_queue
-
-          Trigger.logger.info "Sleeping for #{@interval} seconds"
-          sleep(@interval)
+          wait_for_interval
         end
       ensure
         pid_file.delete
@@ -41,10 +40,23 @@ module Trigger
       end
     end
 
+
     def process_build_queue
-      build = api.scheduled.first
+      build = api.scheduled(:repositories => Trigger.configuration.repositories).first
 
       Trigger::Worker.new(build, api).run if build
+    end
+
+    def reload_configuration
+      Trigger.logger.info "Reloading configuration"
+
+      Trigger.configuration.reload
+    end
+
+    def wait_for_interval
+      Trigger.logger.info "Sleeping for #{@interval} seconds"
+
+      sleep(@interval)
     end
 
     def exit_if_already_running
