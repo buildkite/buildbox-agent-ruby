@@ -38,7 +38,7 @@ module Trigger
             output += chunk
           rescue Errno::EAGAIN, Errno::EWOULDBLOCK
             # do select again
-          rescue EOFError
+          rescue EOFError, Errno::EIO # EOFError from OSX, EIO is raised by ubuntu
             break
           end
         end

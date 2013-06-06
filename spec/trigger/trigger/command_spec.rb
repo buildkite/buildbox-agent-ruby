@@ -34,7 +34,7 @@ describe Trigger::Command do
       # zsh 5.0.2 prints "parse error" which we do not handle.
       # localized systems will print the message in not English which
       # we do not handle either.
-      result.output.should =~ /syntax error/
+      result.output.should =~ /(syntax|parse) error/i
     end
 
     it "can collect output in chunks" do
@@ -93,21 +93,23 @@ describe Trigger::Command do
       thread.join
 
       result.should_not be_success
-      result.output.should =~ /sh: sillycommandlololol: command not found/
+      result.output.should =~ /sillycommandlololol.+not found/
 
       second_result.should_not be_success
-      second_result.output.should =~ /sh: doesntexist.rb: command not found/
+      # osx: `sh: doesntexist.rb: command not found`
+      # ubuntu: `sh: 1: doesntexist.rb: not found`
+      second_result.output.should =~ /doesntexist.rb:.+not found/
     end
 
     it "captures color'd output" do
       chunked_output = ''
-      result = command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')}") do |chunk|
+      result = command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')} --color") do |chunk|
         chunked_output += chunk
       end
 
       result.should be_success
-      result.output.should include("\e[32m")
-      chunked_output.should include("\e[32m")
+      result.output.should include("32m")
+      chunked_output.should include("32m")
     end
   end
 end

@@ -40,7 +40,9 @@ describe 'running a build' do
       result = build.start
 
       result.should_not be_success
-      result.output.should == "sh: foobar: command not found"
+      # ubuntu: sh: 1: foobar: not found
+      # osx: sh: foobar: command not found
+      result.output.should =~ /foobar.+not found/
     end
   end
 
