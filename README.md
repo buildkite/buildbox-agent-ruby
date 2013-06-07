@@ -1,24 +1,14 @@
-# Ci::Ruby
-
-TODO: Write a gem description
+# Buildbox
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Install the gem
 
-    gem 'ci-ruby'
+    $ gem install buildbox
 
-And then execute:
+Then authenticate
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install ci-ruby
-
-## Usage
-
-TODO: Write usage instructions here
+    $ buildbox auth:login [apikey]
 
 ## Contributing
 
