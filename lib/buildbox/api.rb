@@ -1,4 +1,4 @@
-module Trigger
+module Buildbox
   class API
     require 'net/http'
     require 'openssl'
@@ -37,7 +37,7 @@ module Trigger
       uri     = URI.parse(endpoint(path))
       request = Net::HTTP::Get.new(uri.request_uri)
 
-      Trigger.logger.debug "GET #{uri}"
+      Buildbox.logger.debug "GET #{uri}"
 
       http(uri).request(request)
     end
@@ -47,7 +47,7 @@ module Trigger
       request = Net::HTTP::Put.new(uri.request_uri)
       request.set_form_data data
 
-      Trigger.logger.debug "PUT #{uri}"
+      Buildbox.logger.debug "PUT #{uri}"
 
       response = http(uri).request(request)
       raise response.body unless response.code.to_i == 200
@@ -55,8 +55,8 @@ module Trigger
     end
 
     def endpoint(path)
-      (Trigger.configuration.use_ssl ? "https://" : "http://") +
-        "#{Trigger.configuration.endpoint}/v#{Trigger.configuration.api_version}/#{path}"
+      (Buildbox.configuration.use_ssl ? "https://" : "http://") +
+        "#{Buildbox.configuration.endpoint}/v#{Buildbox.configuration.api_version}/#{path}"
     end
 
     def symbolize_keys(hash)

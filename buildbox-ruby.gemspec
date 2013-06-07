@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'trigger/version'
+require 'buildbox/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "trigger"
-  spec.version       = Trigger::VERSION
+  spec.name          = "buildbox"
+  spec.version       = Buildbox::VERSION
   spec.authors       = ["Keith Pitt"]
   spec.email         = ["me@keithpitt.com"]
   spec.description   = %q{TODO: Write a gem description}

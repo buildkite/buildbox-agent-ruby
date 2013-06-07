@@ -1,4 +1,4 @@
-module Trigger
+module Buildbox
   class Worker
     def initialize(build, api)
       @build = build

@@ -1,4 +1,4 @@
-module Trigger
+module Buildbox
   module UTF8
     # Replace or delete invalid UTF-8 characters from text, which is assumed
     # to be in UTF-8.

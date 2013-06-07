@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Trigger::Build do
-  let(:build) { Trigger::Build.new(:uuid => '1234', :repo => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
+describe Buildbox::Build do
+  let(:build) { Buildbox::Build.new(:uuid => '1234', :repo => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
 
   describe "#start" do
     let(:build_path) { double }
@@ -9,8 +9,8 @@ describe Trigger::Build do
     let(:command)    { double(:run => true, :run! => true) }
 
     before do
-      Trigger.stub(:root_path => root_path)
-      Trigger::Command.stub(:new => command)
+      Buildbox.stub(:root_path => root_path)
+      Buildbox::Command.stub(:new => command)
     end
 
     context "with a new checkout" do

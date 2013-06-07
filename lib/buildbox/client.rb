@@ -1,4 +1,4 @@
-module Trigger
+module Buildbox
   class Client
     def initialize(options)
       @options  = options
@@ -8,7 +8,7 @@ module Trigger
     def start
       exit_if_already_running
 
-      Trigger.logger.info "Starting client..."
+      Buildbox.logger.info "Starting client..."
 
       begin
         daemonize if @options[:daemon]
@@ -25,7 +25,7 @@ module Trigger
     end
 
     def stop
-      Trigger.logger.info "Stopping client..."
+      Buildbox.logger.info "Stopping client..."
 
       Process.kill(:KILL, pid_file.delete)
     end
@@ -36,43 +36,43 @@ module Trigger
       if @options[:daemon]
         Process.daemon
 
-        Trigger.logger = Logger.new(Trigger.root_path.join("ci.log"))
+        Buildbox.logger = Logger.new(Buildbox.root_path.join("ci.log"))
       end
     end
 
 
     def process_build_queue
-      build = api.scheduled(:repositories => Trigger.configuration.repositories).first
+      build = api.scheduled(:repositories => Buildbox.configuration.repositories).first
 
-      Trigger::Worker.new(build, api).run if build
+      Buildbox::Worker.new(build, api).run if build
     end
 
     def reload_configuration
-      Trigger.logger.info "Reloading configuration"
+      Buildbox.logger.info "Reloading configuration"
 
-      Trigger.configuration.reload
+      Buildbox.configuration.reload
     end
 
     def wait_for_interval
-      Trigger.logger.info "Sleeping for #{@interval} seconds"
+      Buildbox.logger.info "Sleeping for #{@interval} seconds"
 
       sleep(@interval)
     end
 
     def exit_if_already_running
       if pid_file.exist?
-        Trigger.logger.error "Process (#{pid_file.pid} - #{pid_file.path}) is already running."
+        Buildbox.logger.error "Process (#{pid_file.pid} - #{pid_file.path}) is already running."
 
         exit 1
       end
     end
 
     def api
-      @api ||= Trigger::API.new
+      @api ||= Buildbox::API.new
     end
 
     def pid_file
-      @pid_file ||= Trigger::PidFile.new
+      @pid_file ||= Buildbox::PidFile.new
     end
   end
 end

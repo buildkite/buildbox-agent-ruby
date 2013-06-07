@@ -1,4 +1,4 @@
-module Trigger
+module Buildbox
   class Build
     attr_reader :uuid, :repository_uuid
 
@@ -36,7 +36,7 @@ module Trigger
     end
 
     def build_path
-      Trigger.root_path.join folder_name
+      Buildbox.root_path.join folder_name
     end
 
     def folder_name
@@ -44,7 +44,7 @@ module Trigger
     end
 
     def command
-      Trigger::Command.new(build_path)
+      Buildbox::Command.new(build_path)
     end
   end
 end

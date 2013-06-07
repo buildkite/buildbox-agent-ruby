@@ -1,11 +1,11 @@
-module Trigger
+module Buildbox
   class PidFile
     def exist?
       File.exist?(path)
     end
 
     def path
-      Trigger.root_path.join("ci.pid")
+      Buildbox.root_path.join("ci.pid")
     end
 
     def pid

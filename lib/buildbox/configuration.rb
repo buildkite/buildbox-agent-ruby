@@ -1,4 +1,4 @@
-module Trigger
+module Buildbox
   class Configuration
     def self.load(*args)
       new(*args).tap &:reload
@@ -13,7 +13,7 @@ module Trigger
 
     def initialize
       @use_ssl       = true
-      @endpoint      = 'api.triggerci.com'
+      @endpoint      = 'api.buildboxci.com'
       @api_version   = 1
       @repositories = []
     end
@@ -50,7 +50,7 @@ module Trigger
     end
 
     def path
-      Trigger.root_path.join("configuration.json")
+      Buildbox.root_path.join("configuration.json")
     end
   end
 end

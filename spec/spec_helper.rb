@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 
-require 'trigger'
+require 'buildbox'
 
 SPEC_PATH     = Pathname.new(File.expand_path('..', __FILE__))
 FIXTURES_PATH = SPEC_PATH.join('fixtures')

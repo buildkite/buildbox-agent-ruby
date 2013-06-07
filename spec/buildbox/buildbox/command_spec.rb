@@ -1,7 +1,7 @@
 require "spec_helper"
 
-describe Trigger::Command do
-  let(:command) { Trigger::Command.new }
+describe Buildbox::Command do
+  let(:command) { Buildbox::Command.new }
 
   describe "#run" do
     it "successfully runs and returns the output from a simple comment" do
@@ -49,7 +49,7 @@ describe Trigger::Command do
     end
 
     it "can collect chunks at paticular intervals" do
-      command = Trigger::Command.new(nil, 0.1)
+      command = Buildbox::Command.new(nil, 0.1)
 
       chunked_output = ''
       result = command.run('sleep 0.5; echo hello world') do |chunk|

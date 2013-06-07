@@ -1,4 +1,4 @@
-module Trigger
+module Buildbox
   class Command
     require 'pty'
 
@@ -10,7 +10,7 @@ module Trigger
     end
 
     def run(command)
-      Trigger.logger.debug(command)
+      Buildbox.logger.debug(command)
 
       output = ""
       read_io, write_io, pid = nil
@@ -21,7 +21,7 @@ module Trigger
         # spawn the process in a pseudo terminal so colors out outputted
         read_io, write_io, pid = PTY.spawn("cd #{dir} && #{command}")
       rescue Errno::ENOENT => e
-        return Trigger::Result.new(false, e.message)
+        return Buildbox::Result.new(false, e.message)
       end
 
       write_io.close
@@ -49,9 +49,9 @@ module Trigger
       Process.waitpid(pid)
 
       # output may be invalid UTF-8, as it is produced by the build command.
-      output = Trigger::UTF8.clean(output)
+      output = Buildbox::UTF8.clean(output)
 
-      Trigger::Result.new(output.chomp, $?.exitstatus)
+      Buildbox::Result.new(output.chomp, $?.exitstatus)
     end
 
     def run!(command)
