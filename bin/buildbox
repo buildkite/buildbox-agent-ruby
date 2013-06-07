@@ -16,7 +16,7 @@ help = <<HELP
 
 HELP
 
-global_option_parser = OptionParser.new do |opts|
+global = OptionParser.new do |opts|
   opts.version = Buildbox::VERSION
   opts.banner  = 'Usage: buildbox COMMAND [command-specific-actions]'
 
@@ -44,10 +44,16 @@ commands['version'] = OptionParser.new do |opts|
   opts.banner = "Usage: buildbox version"
 end
 
-global_option_parser.order!
+global.order!
 
 if command = ARGV[0]
-  commands[command].parse!
+
+  if commands.has_key?(command)
+    commands[command].parse!
+  else
+    puts "`#{command}` is an unknown command"
+    exit 1
+  end
 
   if command == "version"
     puts Buildbox::VERSION
@@ -61,5 +67,5 @@ if command = ARGV[0]
     client.stop
   end
 else
-  puts global_option_parser.help
+  puts global.help
 end

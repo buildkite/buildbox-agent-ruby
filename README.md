@@ -10,6 +10,14 @@ Then authenticate
 
     $ buildbox auth:login [apikey]
 
+Then you can start monitoring for builds like so:
+
+    $ buildbox monitor:start
+
+For more help with the command line interface
+
+    $ buildbox --help
+
 ## Contributing
 
 1. Fork it
