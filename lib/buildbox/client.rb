@@ -40,7 +40,6 @@ module Buildbox
       end
     end
 
-
     def process_build_queue
       build = api.scheduled(:repositories => Buildbox.configuration.repositories).first
 

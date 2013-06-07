@@ -2,30 +2,64 @@
 
 dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(dir) unless $LOAD_PATH.include?(dir)
-require 'trigger'
+require 'buildbox'
 require 'optparse'
 
-COMMANDS = %w(start stop)
+commands = {}
+options = {}
 
-options = {}.tap do |options|
-  OptionParser.new do |opts|
-    opts.version = Trigger::VERSION
-    opts.banner  = 'Usage: trigger command [options]'
+help = <<HELP
 
-    opts.separator ""
-    opts.separator "Options:"
+  auth     #  authentication (login, logout)
+  monitor  #  monitor builds (start, stop)
+  version  #  display version
 
-    opts.on("-d", "--daemon", "Runs trigger as a daemon") do |user_agent|
-      options[:daemon] = true
-    end
+HELP
 
-  end.parse!
+global_option_parser = OptionParser.new do |opts|
+  opts.version = Buildbox::VERSION
+  opts.banner  = 'Usage: buildbox COMMAND [command-specific-actions]'
+
+  opts.separator help
 end
 
-client = Trigger::Client.new(options)
+commands['monitor:start'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox monitor:start"
+
+  opts.on("-d", "--daemon", "Runs as a daemon") do
+    options[:daemon] = true
+  end
+
+  opts.on("--help", "You're looking at it.") do
+    puts commands['monitor:start']
+    exit
+  end
+end
+
+commands['monitor:stop'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox monitor:stop"
+end
+
+commands['version'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox version"
+end
+
+global_option_parser.order!
 
 if command = ARGV[0]
-  client.public_send(command)
+  commands[command].parse!
+
+  if command == "version"
+    puts Buildbox::VERSION
+    exit
+  end
+
+  client = Buildbox::Client.new(options)
+  if command == "monitor:start"
+    client.start
+  elsif command == "monitor:stop"
+    client.stop
+  end
 else
-  abort 'No command specified'
+  puts global_option_parser.help
 end
