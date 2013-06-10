@@ -1,13 +1,12 @@
 module Buildbox
   class Build
-    attr_reader :uuid, :repository_uuid
+    attr_reader :uuid
 
     def initialize(options)
-      @uuid            = options[:uuid]
-      @repo            = options[:repo]
-      @commit          = options[:commit]
-      @repository_uuid = options[:repository_uuid]
-      @command         = options[:command] || "bundle && rspec"
+      @uuid       = options[:uuid]
+      @repository = options[:repository]
+      @commit     = options[:commit]
+      @command    = options[:command] || "bundle && rspec"
     end
 
     def start(&block)
@@ -25,7 +24,7 @@ module Buildbox
       unless build_path.exist?
         build_path.mkpath
 
-        command.run! %{git clone "#{@repo}" .}
+        command.run! %{git clone "#{@repository}" .}
       end
     end
 
@@ -40,7 +39,7 @@ module Buildbox
     end
 
     def folder_name
-      @repo.gsub(/[^a-zA-Z0-9]/, '-')
+      @repository.gsub(/[^a-zA-Z0-9]/, '-')
     end
 
     def command

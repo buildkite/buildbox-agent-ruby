@@ -46,13 +46,13 @@ module Buildbox
       worker_uuid = Buildbox.configuration.worker_uuid
       response    = api.register(:uuid => worker_uuid, :hostname => `hostname`.chomp)
 
-      Buildbox.configuration.update :worker_uuid, response[:uuid]
+      Buildbox.configuration.update :worker_uuid, response.payload[:uuid]
     end
 
     def process_build_queue
-      build = api.builds.first
+      build = api.builds.payload.first
 
-      Buildbox::Worker.new(build, api).run if build
+      Buildbox::Worker.new(Build.new(build), api).run if build
     end
 
     def reload_configuration

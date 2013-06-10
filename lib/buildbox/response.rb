@@ -1,12 +1,18 @@
 module Buildbox
-  class Response < Hash
+  class Response
+    attr_reader :payload
+
     def initialize(response)
       @response = response
 
       raise @response.inspect if !success? || !json?
       json = JSON.parse(@response.body)
 
-      replace symbolize_keys(json)
+      if json.kind_of?(Array)
+        @payload = json.map { |item| symbolize_keys(item) }
+      else
+        @payload = symbolize_keys(json)
+      end
     end
 
     def success?

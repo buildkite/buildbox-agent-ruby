@@ -21,7 +21,7 @@ module Buildbox
     end
 
     def builds(options = {})
-      request(:get, "workers/#{worker_uuid}/builds").map { |build| Build.new(build) }
+      request(:get, "workers/#{worker_uuid}/builds")
     end
 
     private
