@@ -36,7 +36,7 @@ module Buildbox
       if @options[:daemon]
         Process.daemon
 
-        Buildbox.logger = Logger.new(Buildbox.root_path.join("ci.log"))
+        Buildbox.logger = Logger.new(Buildbox.root_path.join("buildbox.log"))
       end
     end
 

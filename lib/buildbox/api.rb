@@ -4,8 +4,16 @@ module Buildbox
     require 'openssl'
     require 'json'
 
+    def initialize(options)
+      @options = options
+    end
+
+    def login
+      request(:get, "user")
+    end
+
     def update(build, data)
-      put("repos/#{build.repository_uuid}/builds/#{build.uuid}", normalize_data('build' => data))
+      request(:put, "repos/#{build.repository_uuid}/builds/#{build.uuid}", :build => data)
     end
 
     def scheduled(options = {})
@@ -13,9 +21,8 @@ module Buildbox
 
       options[:repositories].each do |repository|
         response = get("repos/#{repository}/builds/scheduled")
-        json     = JSON.parse(response.body)
 
-        json['response']['builds'].map do |build|
+        response['response']['builds'].map do |build|
           # really smelly way of converting keys to symbols
           builds << Build.new(symbolize_keys(build).merge(:repository_uuid => repository))
         end
@@ -33,34 +40,29 @@ module Buildbox
       end
     end
 
-    def get(path)
+    def request(method, path, post_data = nil)
+      klass   = case method
+                when :get  then Net::HTTP::Get
+                when :put  then Net::HTTP::Put
+                when :post then Net::HTTP::Post
+                else raise "No request class defined for `#{method}`"
+                end
+
       uri     = URI.parse(endpoint(path))
-      request = Net::HTTP::Get.new(uri.request_uri)
+      request = klass.new(uri.request_uri)
 
-      Buildbox.logger.debug "GET #{uri}"
+      unless post_data.nil?
+        request.set_form_data(normalize_data(data))
+      end
 
-      http(uri).request(request)
-    end
+      Buildbox.logger.debug "#{method.to_s.upcase} #{uri}"
 
-    def put(path, data)
-      uri     = URI.parse(endpoint(path))
-      request = Net::HTTP::Put.new(uri.request_uri)
-      request.set_form_data data
-
-      Buildbox.logger.debug "PUT #{uri}"
-
-      response = http(uri).request(request)
-      raise response.body unless response.code.to_i == 200
-      response
+      Response.new http(uri).request(request)
     end
 
     def endpoint(path)
       (Buildbox.configuration.use_ssl ? "https://" : "http://") +
         "#{Buildbox.configuration.endpoint}/v#{Buildbox.configuration.api_version}/#{path}"
-    end
-
-    def symbolize_keys(hash)
-      Hash[hash.map{ |k, v| [k.to_sym, v] }]
     end
 
     def normalize_data(hash)

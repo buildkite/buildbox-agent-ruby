@@ -23,6 +23,14 @@ global = OptionParser.new do |opts|
   opts.separator help
 end
 
+commands['auth:login'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox auth:login API_KEY"
+end
+
+commands['auth:logout'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox auth:logout"
+end
+
 commands['monitor:start'] = OptionParser.new do |opts|
   opts.banner = "Usage: buildbox monitor:start"
 
@@ -46,8 +54,9 @@ end
 
 global.order!
 
-if command = ARGV[0]
+args = ARGV
 
+if command = args.shift
   if commands.has_key?(command)
     commands[command].parse!
   else
@@ -60,11 +69,30 @@ if command = ARGV[0]
     exit
   end
 
-  client = Buildbox::Client.new(options)
-  if command == "monitor:start"
-    client.start
-  elsif command == "monitor:stop"
-    client.stop
+  if command =~ /^monitor/
+    client = Buildbox::Client.new(options)
+    if command == "monitor:start"
+      client.start
+    elsif command == "monitor:stop"
+      client.stop
+    end
+  end
+
+  if command =~ /^auth/
+    auth = Buildbox::Auth.new
+
+    if command == "auth:login"
+      api_key = args[0]
+
+      unless api_key
+        puts commands['auth:login']
+        exit
+      end
+
+      auth.login(:api_key => args[0])
+    elsif command == "auth:logout"
+      auth.logout
+    end
   end
 else
   puts global.help

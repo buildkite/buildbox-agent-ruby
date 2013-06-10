@@ -5,7 +5,7 @@ module Buildbox
     end
 
     def path
-      Buildbox.root_path.join("ci.pid")
+      Buildbox.root_path.join("buildbox.pid")
     end
 
     def pid

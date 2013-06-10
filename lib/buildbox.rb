@@ -8,6 +8,8 @@ require "buildbox/api"
 require "buildbox/worker"
 require "buildbox/pid_file"
 require "buildbox/configuration"
+require "buildbox/auth"
+require "buildbox/response"
 
 module Buildbox
   require 'fileutils'
