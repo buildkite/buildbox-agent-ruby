@@ -6,7 +6,7 @@ module Buildbox
 
     require 'json'
 
-    attr_accessor :worker
+    attr_accessor :worker_uuid
     attr_accessor :api_key
     attr_accessor :endpoint
     attr_accessor :use_ssl
@@ -45,11 +45,11 @@ module Buildbox
     private
 
     def to_json
-      JSON.pretty_generate(:endpoint => endpoint,
-                           :use_ssl => use_ssl,
+      JSON.pretty_generate(:endpoint    => endpoint,
+                           :use_ssl     => use_ssl,
                            :api_version => api_version,
-                           :api_key => api_key,
-                           :worker => worker)
+                           :api_key     => api_key,
+                           :worker_uuid => worker_uuid)
     end
 
     def read

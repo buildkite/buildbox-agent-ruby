@@ -8,27 +8,20 @@ module Buildbox
       @options = options
     end
 
+    def register(data)
+      request(:post, "worker", :worker => data)
+    end
+
     def login
       request(:get, "user")
     end
 
     def update(build, data)
-      request(:put, "repos/#{build.repository_uuid}/builds/#{build.uuid}", :build => data)
+      request(:put, "builds/#{build.uuid}", :build => data)
     end
 
-    def scheduled(options = {})
-      builds = []
-
-      options[:repositories].each do |repository|
-        response = get("repos/#{repository}/builds/scheduled")
-
-        response['response']['builds'].map do |build|
-          # really smelly way of converting keys to symbols
-          builds << Build.new(symbolize_keys(build).merge(:repository_uuid => repository))
-        end
-      end
-
-      builds
+    def builds(options = {})
+      request(:get, "builds").map { |build| Build.new(build) }
     end
 
     private
@@ -51,11 +44,14 @@ module Buildbox
       uri     = URI.parse(endpoint(path))
       request = klass.new(uri.request_uri)
 
-      unless post_data.nil?
-        request.set_form_data(normalize_data(data))
-      end
+      if post_data.nil?
+        Buildbox.logger.debug "#{method.to_s.upcase} #{uri}"
+      else
+        normalized_post_data = normalize_data(post_data)
+        request.set_form_data normalized_post_data
 
-      Buildbox.logger.debug "#{method.to_s.upcase} #{uri}"
+        Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{normalized_post_data.inspect}"
+      end
 
       Response.new http(uri).request(request)
     end

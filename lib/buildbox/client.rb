@@ -10,6 +10,8 @@ module Buildbox
 
       Buildbox.logger.info "Starting client..."
 
+      register_client
+
       begin
         daemonize if @options[:daemon]
         pid_file.save
@@ -40,20 +42,25 @@ module Buildbox
       end
     end
 
+    def register_client
+      worker_uuid = Buildbox.configuration.worker_uuid
+      response    = api.register(:uuid => worker_uuid, :hostname => `hostname`.chomp)
+
+      Buildbox.configuration.update :worker_uuid, response[:uuid]
+    end
+
     def process_build_queue
-      build = api.scheduled(:repositories => Buildbox.configuration.repositories).first
+      build = api.builds.first
 
       Buildbox::Worker.new(build, api).run if build
     end
 
     def reload_configuration
-      Buildbox.logger.info "Reloading configuration"
-
       Buildbox.configuration.reload
     end
 
     def wait_for_interval
-      Buildbox.logger.info "Sleeping for #{@interval} seconds"
+      Buildbox.logger.debug "Sleeping for #{@interval} seconds"
 
       sleep(@interval)
     end
@@ -67,7 +74,7 @@ module Buildbox
     end
 
     def api
-      @api ||= Buildbox::API.new
+      @api ||= Buildbox::API.new(:api_key => Buildbox.configuration.api_key)
     end
 
     def pid_file
