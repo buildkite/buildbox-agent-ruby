@@ -9,7 +9,7 @@ module Buildbox
     end
 
     def register(data)
-      request(:post, "worker", :worker => data)
+      request(:post, "workers", :worker => data)
     end
 
     def login
@@ -17,11 +17,11 @@ module Buildbox
     end
 
     def update(build, data)
-      request(:put, "builds/#{build.uuid}", :build => data)
+      request(:put, "workers/#{worker_uuid}/builds/#{build.uuid}", :build => data)
     end
 
     def builds(options = {})
-      request(:get, "builds").map { |build| Build.new(build) }
+      request(:get, "workers/#{worker_uuid}/builds").map { |build| Build.new(build) }
     end
 
     private
@@ -54,6 +54,10 @@ module Buildbox
       end
 
       Response.new http(uri).request(request)
+    end
+
+    def worker_uuid
+      Buildbox.configuration.worker_uuid
     end
 
     def endpoint(path)
