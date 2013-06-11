@@ -8,16 +8,30 @@ module Buildbox
       @options = options
     end
 
-    def register(data)
-      request(:post, "workers", :worker => data)
+    def crash(exception, information = {})
+      payload = {
+        :exception => exception.class.name,
+        :message   => exception.message,
+        :backtrace => exception.backtrace,
+        :meta      => {}
+      }
+
+      payload[:meta][:worker_uuid] = worker_uuid if worker_uuid
+      payload[:meta][:build_uuid]  = information[:build] if information[:build]
+
+      request(:post, "crashes", :crash => payload)
+    end
+
+    def register(payload)
+      request(:post, "workers", :worker => payload)
     end
 
     def login
       request(:get, "user")
     end
 
-    def update(build, data)
-      request(:put, "workers/#{worker_uuid}/builds/#{build.uuid}", :build => data)
+    def update(build, payload)
+      request(:put, "workers/#{worker_uuid}/builds/#{build.uuid}", :build => payload)
     end
 
     def builds(options = {})
@@ -33,7 +47,7 @@ module Buildbox
       end
     end
 
-    def request(method, path, post_data = nil)
+    def request(method, path, payload = nil)
       klass   = case method
                 when :get  then Net::HTTP::Get
                 when :put  then Net::HTTP::Put
@@ -44,13 +58,13 @@ module Buildbox
       uri     = URI.parse(endpoint(path))
       request = klass.new(uri.request_uri)
 
-      if post_data.nil?
+      if payload.nil?
         Buildbox.logger.debug "#{method.to_s.upcase} #{uri}"
       else
-        normalized_post_data = normalize_data(post_data)
-        request.set_form_data normalized_post_data
+        normalized_payload = normalize_payload(payload)
+        request.set_form_data normalized_payload
 
-        Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{normalized_post_data.inspect}"
+        Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{normalized_payload.inspect}"
       end
 
       Response.new http(uri).request(request)
@@ -65,12 +79,22 @@ module Buildbox
         "#{Buildbox.configuration.endpoint}/v#{Buildbox.configuration.api_version}/#{path}"
     end
 
-    def normalize_data(hash)
+    # This is the worst method I've ever written, sorry.
+    # { :foo => { :bar => { :bang => "yolo" } } } => { "foo[bar][bang]" => "yolo" }
+    def normalize_payload(hash)
       hash.inject({}) do |target, member|
         key, value = member
 
         if value.kind_of?(Hash)
-          value.each { |key2, value2| target["#{key}[#{key2}]"] = value2.to_s }
+          value.each do |key2, value2|
+            if value2.kind_of?(Hash)
+              normalize_payload(value2).each_pair do |key3, value3|
+                target["#{key}[#{key2}][#{key3}]"] = value3.to_s
+              end
+            else
+              target["#{key}[#{key2}]"] = value2.to_s
+            end
+          end
         else
           target[key] = value.to_s
         end

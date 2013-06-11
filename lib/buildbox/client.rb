@@ -17,10 +17,13 @@ module Buildbox
         pid_file.save
 
         loop do
+          asdf
           reload_configuration
           process_build_queue
           wait_for_interval
         end
+      rescue => e
+        api.crash(e, :build => @build)
       ensure
         pid_file.delete
       end
@@ -50,9 +53,15 @@ module Buildbox
     end
 
     def process_build_queue
-      build = api.builds.payload.first
+      scheduled = api.builds.payload.first
 
-      Buildbox::Worker.new(Build.new(build), api).run if build
+      if scheduled
+        # store build in an instance variable so we can report on it in
+        # the event of a crash
+        @build = Build.new(scheduled)
+        Buildbox::Worker.new(@build, api).run
+        @build = nil
+      end
     end
 
     def reload_configuration

@@ -5,14 +5,18 @@ module Buildbox
     def initialize(response)
       @response = response
 
-      raise "API Error: #{@response.code} #{@response.body}" if !success? || !json?
+      unless success?
+        raise "API Error: #{@response.code} #{@response.body}"
+      end
 
-      json = JSON.parse(@response.body)
+      if json?
+        json = JSON.parse(@response.body)
 
-      if json.kind_of?(Array)
-        @payload = json.map { |item| symbolize_keys(item) }
-      else
-        @payload = symbolize_keys(json)
+        if json.kind_of?(Array)
+          @payload = json.map { |item| symbolize_keys(item) }
+        else
+          @payload = symbolize_keys(json)
+        end
       end
     end
 
