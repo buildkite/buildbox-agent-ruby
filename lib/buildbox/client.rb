@@ -17,7 +17,6 @@ module Buildbox
         pid_file.save
 
         loop do
-          asdf
           reload_configuration
           process_build_queue
           wait_for_interval
