@@ -5,7 +5,8 @@ module Buildbox
     def initialize(response)
       @response = response
 
-      raise @response.inspect if !success? || !json?
+      raise "API Error: #{@response.code} #{@response.body}" if !success? || !json?
+
       json = JSON.parse(@response.body)
 
       if json.kind_of?(Array)
