@@ -18,6 +18,7 @@ module Buildbox
 
       payload[:meta][:worker_uuid] = worker_uuid if worker_uuid
       payload[:meta][:build_uuid]  = information[:build] if information[:build]
+      payload[:meta][:client_version] = Buildbox::VERSION
 
       request(:post, "crashes", :crash => payload)
     end
@@ -79,28 +80,36 @@ module Buildbox
         "#{Buildbox.configuration.endpoint}/v#{Buildbox.configuration.api_version}/#{path}"
     end
 
-    # This is the worst method I've ever written, sorry.
     # { :foo => { :bar => { :bang => "yolo" } } } => { "foo[bar][bang]" => "yolo" }
-    def normalize_payload(hash)
-      hash.inject({}) do |target, member|
-        key, value = member
-
-        if value.kind_of?(Hash)
-          value.each do |key2, value2|
-            if value2.kind_of?(Hash)
-              normalize_payload(value2).each_pair do |key3, value3|
-                target["#{key}[#{key2}][#{key3}]"] = value3.to_s
-              end
-            else
-              target["#{key}[#{key2}]"] = value2.to_s
-            end
+    def normalize_payload(params, key=nil)
+      params = flatten_keys(params) if params.is_a?(Hash)
+      result = {}
+      params.each do |k,v|
+        case v
+        when Hash
+          result[k.to_s] = normalize_params(v)
+        when Array
+          v.each_with_index do |val,i|
+            result["#{k.to_s}[#{i}]"] = val.to_s
           end
         else
-          target[key] = value.to_s
+          result[k.to_s] = v.to_s
         end
-
-        target
       end
+      result
+    end
+
+    def flatten_keys(hash, newhash={}, keys=nil)
+      hash.each do |k, v|
+        k = k.to_s
+        keys2 = keys ? keys+"[#{k}]" : k
+        if v.is_a?(Hash)
+          flatten_keys(v, newhash, keys2)
+        else
+          newhash[keys2] = v
+        end
+      end
+      newhash
     end
   end
 end
