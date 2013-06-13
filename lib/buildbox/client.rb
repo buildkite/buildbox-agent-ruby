@@ -22,6 +22,9 @@ module Buildbox
           wait_for_interval
         end
       rescue => e
+        Buildbox.logger.error "#{e.class.name}: #{e.message}"
+        e.backtrace.each { |line| Buildbox.logger.error line }
+
         api.crash(e, :build => @build)
       ensure
         pid_file.delete

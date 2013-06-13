@@ -6,27 +6,17 @@ module Buildbox
     end
 
     def run
-      @build.start :partial_result => method(:partial_result),
-                   :finished_result => method(:finished_result),
-                   :finished_build => method(:finished_build)
+      results = @build.start do |result|
+        update(:result => result.as_json)
+      end
 
-      # update(:results => results.map(&:json))
+      update(:results => results.map(&:as_json))
     end
 
     private
 
-    def partial_result(message)
-      p message
-    end
-
-    def finished_result
-    end
-
-    def finished_build
-    end
-
-    def update(data)
-      # @api.update(@build, data)
+    def update(results)
+      @api.update(@build, results)
     end
   end
 end

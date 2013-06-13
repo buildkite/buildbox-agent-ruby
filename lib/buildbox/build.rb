@@ -9,22 +9,17 @@ module Buildbox
       @config     = options[:config]
     end
 
-    def start(options)
-      raise options.inspect
-
+    def start(&block)
       @block   = block
       @results = []
-      @index   = 0
 
       unless build_path.exist?
-        @results << setup_build_path
-        @results << clone_repository
+        setup_build_path && clone_repository
       end
 
-      @results << fetch_and_checkout
-      @results << build
+      fetch_and_checkout && build
 
-      options[:partial_result].call @results.flatten
+      @results.flatten
     end
 
     private
@@ -44,9 +39,7 @@ module Buildbox
     end
 
     def build
-      @config[:build][:commands].each do |command|
-        run command
-      end
+      @config[:build][:commands].each { |command| run command }
     end
 
     def folder_name
@@ -58,14 +51,13 @@ module Buildbox
     end
 
     def run(command)
-      path   = build_path if build_path.exist?
+      path = build_path if build_path.exist?
 
-      result = Buildbox::Command.new(path).run(command) do |chunk|
-        @block.call(index, command, chunk)
-        options[:partial_result].call "hi"
+      @results << result = Buildbox::Command.new(path).run(command) do |result, chunk|
+        @block.call(result)
       end
 
-      options[:finished_result].call result
+      @block.call(result)
 
       result
     end

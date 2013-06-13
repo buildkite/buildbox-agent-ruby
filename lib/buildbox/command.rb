@@ -1,6 +1,7 @@
 module Buildbox
   class Command
     require 'pty'
+    require 'securerandom'
 
     class Error < StandardError; end
 
@@ -12,9 +13,12 @@ module Buildbox
     def run(command)
       Buildbox.logger.debug(command)
 
-      started_at = Time.now
-      result = Buildbox::Result.new(:command => command, :started_at => Time.now, :output => "")
       read_io, write_io, pid = nil
+
+      result = Buildbox::Result.new(:uuid => SecureRandom.uuid,
+                                    :command => command,
+                                    :started_at => Time.now,
+                                    :output => "")
 
       begin
         dir = File.expand_path(@path)
