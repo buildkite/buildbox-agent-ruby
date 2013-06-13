@@ -1,11 +1,9 @@
 module Buildbox
   class Result
+    attr_accessor :started_at, :finished_at, :command, :output, :exit_status
+
     def initialize(options)
-      @started_at  = options[:started_at]
-      @finished_at = options[:finished_at]
-      @command     = options[:command]
-      @output      = options[:output]
-      @exit_status = options[:exit_status]
+      options.each_pair { |key, value| self.public_send("#{key}=", value) }
     end
 
     def as_json

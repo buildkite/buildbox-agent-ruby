@@ -13,7 +13,7 @@ module Buildbox
       Buildbox.logger.debug(command)
 
       started_at = Time.now
-      output = ""
+      result = Buildbox::Result.new(:command => command, :started_at => Time.now, :output => "")
       read_io, write_io, pid = nil
 
       begin
@@ -34,9 +34,9 @@ module Buildbox
           begin
             chunk = read_io.read_nonblock(10240)
             if block_given?
-              yield chunk
+              yield result, chunk
             end
-            output += chunk
+            result.output += chunk
           rescue Errno::EAGAIN, Errno::EWOULDBLOCK
             # do select again
           rescue EOFError, Errno::EIO # EOFError from OSX, EIO is raised by ubuntu
@@ -52,11 +52,11 @@ module Buildbox
       # output may be invalid UTF-8, as it is produced by the build command.
       output = Buildbox::UTF8.clean(output)
 
-      Buildbox::Result.new(:started_at => started_at,
-                           :finished_at => Time.now,
-                           :command => command,
-                           :output => output.chomp,
-                           :exit_status => $?.exitstatus)
+      result.tap do |result|
+        result.output      = result.output.chomp
+        result.exit_status = $?.exitstatus
+        result.finished_at = Time.now
+      end
     end
 
     def run!(command)

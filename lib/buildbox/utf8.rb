@@ -46,5 +46,22 @@ module Buildbox
       end
       raise CannotFindEncoding, 'Cannot find an intermediate encoding for conversion to UTF-8'
     end
+
+    def self.clean_utf8_iconv
+      unless @iconv_loaded
+        begin
+          require 'iconv'
+        rescue LoadError
+          @iconv = nil
+        else
+          @iconv = Iconv.new('utf-8//translit//ignore', 'utf-8')
+          # On some systems (Linux appears to be vulnerable, FreeBSD not)
+          # iconv chokes on invalid utf-8 with //translit//ignore.
+          @iconv_fallback = Iconv.new('utf-8//ignore', 'utf-8')
+        end
+        @iconv_loaded = true
+      end
+      [@iconv, @iconv_fallback]
+    end
   end
 end

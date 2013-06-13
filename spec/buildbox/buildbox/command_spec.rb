@@ -39,7 +39,7 @@ describe Buildbox::Command do
 
     it "can collect output in chunks" do
       chunked_output = ''
-      result = command.run('echo hello world') do |chunk|
+      result = command.run('echo hello world') do |result, chunk|
         chunked_output += chunk
       end
 
@@ -52,7 +52,7 @@ describe Buildbox::Command do
       command = Buildbox::Command.new(nil, 0.1)
 
       chunked_output = ''
-      result = command.run('sleep 0.5; echo hello world') do |chunk|
+      result = command.run('sleep 0.5; echo hello world') do |result, chunk|
         chunked_output += chunk
       end
 
@@ -61,11 +61,13 @@ describe Buildbox::Command do
       chunked_output.should == "hello world\r\n"
     end
 
+    it 'passes a result object to the block'
+
     it "can collect chunks from within a thread" do
       chunked_output = ''
       result = nil
       worker_thread = Thread.new do
-        result = command.run('echo before sleep; sleep 1; echo after sleep') do |chunk|
+        result = command.run('echo before sleep; sleep 1; echo after sleep') do |result, chunk|
           chunked_output += chunk
         end
       end
@@ -103,7 +105,7 @@ describe Buildbox::Command do
 
     it "captures color'd output" do
       chunked_output = ''
-      result = command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')} --color") do |chunk|
+      result = command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')} --color") do |result, chunk|
         chunked_output += chunk
       end
 
