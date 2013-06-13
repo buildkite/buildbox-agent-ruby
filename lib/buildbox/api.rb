@@ -87,7 +87,7 @@ module Buildbox
       params.each do |k,v|
         case v
         when Hash
-          result[k.to_s] = normalize_params(v)
+          result[k.to_s] = normalized_payload(v)
         when Array
           v.each_with_index do |val,i|
             result["#{k.to_s}[#{i}]"] = val.to_s
