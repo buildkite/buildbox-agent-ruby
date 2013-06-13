@@ -6,44 +6,68 @@ module Buildbox
       @uuid       = options[:uuid]
       @repository = options[:repository]
       @commit     = options[:commit]
-      @command    = options[:command] || "bundle && rspec"
+      @config     = options[:config]
     end
 
-    def start(&block)
-      checkout
-      update
+    def start(options)
+      raise options.inspect
 
-      @result = command.run(@command) do |chunk|
-        yield(chunk) if block_given?
+      @block   = block
+      @results = []
+      @index   = 0
+
+      unless build_path.exist?
+        @results << setup_build_path
+        @results << clone_repository
       end
+
+      @results << fetch_and_checkout
+      @results << build
+
+      options[:partial_result].call @results.flatten
     end
 
     private
 
-    def checkout
-      unless build_path.exist?
-        build_path.mkpath
+    def setup_build_path
+      run %{mkdir -p "#{build_path}"}
+    end
 
-        command.run! %{git clone "#{@repository}" .}
+    def clone_repository
+      run %{git clone "#{@repository}" .}
+    end
+
+    def fetch_and_checkout
+      run %{git clean -fd}
+      run %{git fetch}
+      run %{git checkout -qf "#{@commit}"}
+    end
+
+    def build
+      @config[:build][:commands].each do |command|
+        run command
       end
-    end
-
-    def update
-      command.run! %{git clean -fd}
-      command.run! %{git fetch}
-      command.run! %{git checkout -qf "#{@commit}"}
-    end
-
-    def build_path
-      Buildbox.root_path.join folder_name
     end
 
     def folder_name
       @repository.gsub(/[^a-zA-Z0-9]/, '-')
     end
 
-    def command
-      Buildbox::Command.new(build_path)
+    def build_path
+      Buildbox.root_path.join folder_name
+    end
+
+    def run(command)
+      path   = build_path if build_path.exist?
+
+      result = Buildbox::Command.new(path).run(command) do |chunk|
+        @block.call(index, command, chunk)
+        options[:partial_result].call "hi"
+      end
+
+      options[:finished_result].call result
+
+      result
     end
   end
 end

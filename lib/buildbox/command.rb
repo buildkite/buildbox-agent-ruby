@@ -12,6 +12,7 @@ module Buildbox
     def run(command)
       Buildbox.logger.debug(command)
 
+      started_at = Time.now
       output = ""
       read_io, write_io, pid = nil
 
@@ -51,7 +52,11 @@ module Buildbox
       # output may be invalid UTF-8, as it is produced by the build command.
       output = Buildbox::UTF8.clean(output)
 
-      Buildbox::Result.new(output.chomp, $?.exitstatus)
+      Buildbox::Result.new(:started_at => started_at,
+                           :finished_at => Time.now,
+                           :command => command,
+                           :output => output.chomp,
+                           :exit_status => $?.exitstatus)
     end
 
     def run!(command)
