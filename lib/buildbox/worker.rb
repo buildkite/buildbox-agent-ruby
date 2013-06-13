@@ -7,16 +7,16 @@ module Buildbox
 
     def run
       results = @build.start do |result|
-        update(:result => result.as_json)
+        update(result)
       end
 
-      update(:results => results.map(&:as_json))
+      update(results)
     end
 
     private
 
     def update(results)
-      @api.update(@build, results)
+      @api.update(@build, :results => [ results ].flatten.map(&:as_json))
     end
   end
 end
