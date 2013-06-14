@@ -36,11 +36,11 @@ module Buildbox
     end
 
     def update_build_state(build_uuid, state)
-      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}", :state => state)
+      Thread.new { request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}", :state => state) }
     end
 
     def update_build_result(build_uuid, result_uuid, attributes)
-      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}/results/#{result_uuid}", attributes)
+      Thread.new { request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}/results/#{result_uuid}", attributes) }
     end
 
     private
