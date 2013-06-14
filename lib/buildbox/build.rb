@@ -30,12 +30,12 @@ module Buildbox
     end
 
     def clone_repository
-      run %{git clone "#{@repository}" .}
+      run %{git clone "#{@repository}" . -q}
     end
 
     def fetch_and_checkout
       run %{git clean -fd}
-      run %{git fetch -v}
+      run %{git fetch}
       run %{git checkout -qf "#{@commit}"}
     end
 
