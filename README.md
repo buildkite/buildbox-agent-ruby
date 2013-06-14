@@ -12,7 +12,7 @@ Then authenticate
 
 Then you can start monitoring for builds like so:
 
-    $ buildbox monitor:start
+    $ buildbox monitor:start --daemon
 
 For more help with the command line interface
 
