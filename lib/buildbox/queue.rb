@@ -15,10 +15,10 @@ module Buildbox
         json         = result.as_json
         json[:state] = json.delete(:finished) ? 'finished' : 'started'
 
-        api.update_build_result(build.uuid, json.delete(:uuid), json)
+        api.update_build_result_async(build.uuid, json.delete(:uuid), json)
       end
 
-      api.update_build_state(build.uuid, 'finished')
+      api.update_build_state_async(build.uuid, 'finished')
     end
 
     def api
