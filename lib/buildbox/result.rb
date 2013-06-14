@@ -1,9 +1,22 @@
 module Buildbox
   class Result
-    attr_accessor :uuid, :command, :output, :exit_status
+    attr_writer :output
+    attr_reader :uuid, :command
+    attr_accessor :finished, :exit_status
 
-    def initialize(options)
-      options.each_pair { |key, value| self.public_send("#{key}=", value) }
+    def initialize(command)
+      @uuid     = SecureRandom.uuid
+      @output   = ""
+      @finished = false
+      @command  = command
+    end
+
+    def output
+      Buildbox::UTF8.clean(@output).chomp
+    end
+
+    def finished?
+      finished
     end
 
     def success?

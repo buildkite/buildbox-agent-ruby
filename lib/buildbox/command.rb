@@ -14,10 +14,7 @@ module Buildbox
       Buildbox.logger.debug(command)
 
       read_io, write_io, pid = nil
-
-      result = Buildbox::Result.new(:uuid => SecureRandom.uuid,
-                                    :command => command,
-                                    :output => "")
+      result = Buildbox::Result.new(command)
 
       begin
         dir = File.expand_path(@path)
@@ -52,11 +49,9 @@ module Buildbox
       read_io.close
       Process.waitpid(pid)
 
-      result.exit_status = $?.exitstatus
-
       # output may be invalid UTF-8, as it is produced by the build command.
-      output = Buildbox::UTF8.clean(output)
-      result.output = result.output.chomp
+      result.finished    = true
+      result.exit_status = $?.exitstatus
 
       result
     end

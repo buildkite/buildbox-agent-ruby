@@ -12,7 +12,8 @@ module Buildbox
       api.update_build_state(build.uuid, 'started')
 
       build.start do |result|
-        json = result.as_json
+        json         = result.as_json
+        json[:state] = json.delete(:finished) ? 'finished' : 'started'
 
         api.update_build_result(build.uuid, json.delete(:uuid), json)
       end

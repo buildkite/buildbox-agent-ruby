@@ -20,11 +20,11 @@ module Buildbox
       payload[:meta][:build_uuid]  = information[:build] if information[:build]
       payload[:meta][:client_version] = Buildbox::VERSION
 
-      request(:post, "crashes", :crash => payload)
+      request(:post, "crashes", payload)
     end
 
     def register(payload)
-      request(:post, "workers", :worker => payload)
+      request(:post, "workers", payload)
     end
 
     def login
@@ -36,7 +36,7 @@ module Buildbox
     end
 
     def update_build_state(build_uuid, state)
-      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}", state)
+      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}", :state => state)
     end
 
     def update_build_result(build_uuid, result_uuid, attributes)
