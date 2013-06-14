@@ -6,6 +6,7 @@ module Buildbox
 
     def initialize(options)
       @options = options
+      @queue   = ::Queue.new
     end
 
     def crash(exception, information = {})
@@ -35,15 +36,40 @@ module Buildbox
       request(:get, "workers/#{worker_uuid}/builds")
     end
 
+    def update_build_state_async(*args)
+      async :update_build_state, args
+    end
+
     def update_build_state(build_uuid, state)
-      Thread.new { request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}", :state => state) }
+      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}", :state => state)
+    end
+
+    def update_build_result_async(*args)
+      async :update_build_result, args
     end
 
     def update_build_result(build_uuid, result_uuid, attributes)
-      Thread.new { request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}/results/#{result_uuid}", attributes) }
+      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}/results/#{result_uuid}", attributes)
     end
 
     private
+
+    def async(method, args)
+      @queue << [ method, args ]
+
+      if !@thread || !@thread.alive?
+        @thread = Thread.new do
+          loop do
+            async_call = @queue.pop
+            Thread.exit if async_call.nil?
+
+            self.send(async_call[0], *async_call[1])
+          end
+        end
+
+        @thread.abort_on_exception = true
+      end
+    end
 
     def http(uri)
       Net::HTTP.new(uri.host, uri.port).tap do |http|
