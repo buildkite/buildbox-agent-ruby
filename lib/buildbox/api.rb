@@ -31,12 +31,16 @@ module Buildbox
       request(:get, "user")
     end
 
-    def update(build, payload)
-      request(:put, "workers/#{worker_uuid}/builds/#{build.uuid}", :build => payload)
-    end
-
     def builds(options = {})
       request(:get, "workers/#{worker_uuid}/builds")
+    end
+
+    def update_build_state(build_uuid, state)
+      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}", state)
+    end
+
+    def update_build_result(build_uuid, result_uuid, attributes)
+      request(:put, "workers/#{worker_uuid}/builds/#{build_uuid}/results/#{result_uuid}", attributes)
     end
 
     private
@@ -57,7 +61,8 @@ module Buildbox
                 end
 
       uri     = URI.parse(endpoint(path))
-      request = klass.new(uri.request_uri, 'Content-Type' =>'application/json')
+      request = klass.new(uri.request_uri, 'Content-Type' => 'application/json',
+                                           'Accept' => 'application/json')
 
       if payload.nil?
         Buildbox.logger.debug "#{method.to_s.upcase} #{uri}"

@@ -11,15 +11,16 @@ module Buildbox
 
     def start(&block)
       @block   = block
-      @results = []
 
       unless build_path.exist?
-        setup_build_path && clone_repository
+        setup_build_path
+        clone_repository
       end
 
-      fetch_and_checkout && build
+      fetch_and_checkout
+      build
 
-      @results.flatten
+      true
     end
 
     private
@@ -53,7 +54,7 @@ module Buildbox
     def run(command)
       path = build_path if build_path.exist?
 
-      @results << result = Buildbox::Command.new(path).run(command) do |result, chunk|
+      result = Buildbox::Command.new(path).run(command) do |result, chunk|
         @block.call(result)
       end
 

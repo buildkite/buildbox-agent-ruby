@@ -1,6 +1,6 @@
 module Buildbox
   class Result
-    attr_accessor :uuid, :started_at, :finished_at, :command, :output, :exit_status
+    attr_accessor :uuid, :command, :output, :exit_status
 
     def initialize(options)
       options.each_pair { |key, value| self.public_send("#{key}=", value) }
@@ -12,11 +12,9 @@ module Buildbox
 
     def as_json
       { :uuid        => @uuid,
-        :started_at  => @started_at,
-        :finished_at => @finished_at,
         :command     => @command,
         :output      => @output,
-        :exit_status => @exit_status }.delete_if { |k, v| v.nil? }
+        :exit_status => @exit_status }
     end
   end
 end

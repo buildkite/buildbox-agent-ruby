@@ -17,7 +17,6 @@ module Buildbox
 
       result = Buildbox::Result.new(:uuid => SecureRandom.uuid,
                                     :command => command,
-                                    :started_at => Time.now,
                                     :output => "")
 
       begin
@@ -53,14 +52,13 @@ module Buildbox
       read_io.close
       Process.waitpid(pid)
 
+      result.exit_status = $?.exitstatus
+
       # output may be invalid UTF-8, as it is produced by the build command.
       output = Buildbox::UTF8.clean(output)
+      result.output = result.output.chomp
 
-      result.tap do |result|
-        result.output      = result.output.chomp
-        result.exit_status = $?.exitstatus
-        result.finished_at = Time.now
-      end
+      result
     end
 
     def run!(command)

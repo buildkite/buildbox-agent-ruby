@@ -18,14 +18,14 @@ module Buildbox
 
         loop do
           reload_configuration
-          process_build_queue
+          Buildbox::Queue.new.process
           wait_for_interval
         end
       rescue => e
         Buildbox.logger.error "#{e.class.name}: #{e.message}"
         e.backtrace.each { |line| Buildbox.logger.error line }
 
-        api.crash(e, :build => @build)
+        api.crash(e)
       ensure
         pid_file.delete
       end
@@ -54,18 +54,6 @@ module Buildbox
       Buildbox.configuration.update :worker_uuid, response.payload[:uuid]
     end
 
-    def process_build_queue
-      scheduled = api.builds.payload.first
-
-      if scheduled
-        # store build in an instance variable so we can report on it in
-        # the event of a crash
-        @build = Build.new(scheduled)
-        Buildbox::Worker.new(@build, api).run
-        @build = nil
-      end
-    end
-
     def reload_configuration
       Buildbox.configuration.reload
     end
@@ -82,6 +70,9 @@ module Buildbox
 
         exit 1
       end
+    end
+
+    def worker
     end
 
     def api
