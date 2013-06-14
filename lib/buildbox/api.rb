@@ -57,15 +57,13 @@ module Buildbox
                 end
 
       uri     = URI.parse(endpoint(path))
-      request = klass.new(uri.request_uri)
+      request = klass.new(uri.request_uri, 'Content-Type' =>'application/json')
 
       if payload.nil?
         Buildbox.logger.debug "#{method.to_s.upcase} #{uri}"
       else
-        normalized_payload = normalize_payload(payload)
-        request.set_form_data normalized_payload
-
-        Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{normalized_payload.inspect}"
+        request.body = JSON.dump(payload)
+        Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{payload.inspect}"
       end
 
       Response.new http(uri).request(request)
@@ -78,38 +76,6 @@ module Buildbox
     def endpoint(path)
       (Buildbox.configuration.use_ssl ? "https://" : "http://") +
         "#{Buildbox.configuration.endpoint}/v#{Buildbox.configuration.api_version}/#{path}"
-    end
-
-    # { :foo => { :bar => { :bang => "yolo" } } } => { "foo[bar][bang]" => "yolo" }
-    def normalize_payload(params, key=nil)
-      params = flatten_keys(params) if params.is_a?(Hash)
-      result = {}
-      params.each do |k,v|
-        case v
-        when Hash
-          result[k.to_s] = normalized_payload(v)
-        when Array
-          v.each_with_index do |val,i|
-            result["#{k.to_s}[#{i}]"] = val.to_s
-          end
-        else
-          result[k.to_s] = v.to_s
-        end
-      end
-      result
-    end
-
-    def flatten_keys(hash, newhash={}, keys=nil)
-      hash.each do |k, v|
-        k = k.to_s
-        keys2 = keys ? keys+"[#{k}]" : k
-        if v.is_a?(Hash)
-          flatten_keys(v, newhash, keys2)
-        else
-          newhash[keys2] = v
-        end
-      end
-      newhash
     end
   end
 end

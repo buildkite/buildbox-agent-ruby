@@ -6,11 +6,13 @@ module Buildbox
     end
 
     def run
+      update(@build, :started_at => Time.now)
+
       results = @build.start do |result|
-        update(result)
+        update(:results =>  [ result.as_json ])
       end
 
-      update(results)
+      update(:finished_at => Time.now, :results => results.map(&:as_json))
     end
 
     private
