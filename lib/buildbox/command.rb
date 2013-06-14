@@ -1,7 +1,6 @@
 module Buildbox
   class Command
     require 'pty'
-    require 'securerandom'
 
     class Error < StandardError; end
 
