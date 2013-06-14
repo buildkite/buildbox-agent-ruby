@@ -13,7 +13,7 @@ module Buildbox
     attr_accessor :api_version
 
     def initialize
-      @use_ssl       = false
+      @use_ssl       = true
       @endpoint      = 'api.buildbox.io'
       @api_version   = 1
     end
