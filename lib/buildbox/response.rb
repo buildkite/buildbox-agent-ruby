@@ -5,9 +5,11 @@ module Buildbox
     def initialize(response)
       @response = response
 
-      unless success?
-        raise "API Error: #{@response.code} #{@response.body}"
-      end
+      Buildbox.logger.debug "Status: #{status_code}"
+      Buildbox.logger.debug "Content Type: #{content_type}"
+      Buildbox.logger.debug @response.body
+
+      raise "API Response Error: #{@response.code} #{@response.body}" unless success?
 
       if json?
         json = JSON.parse(@response.body)
@@ -21,13 +23,21 @@ module Buildbox
     end
 
     def success?
-      @response.code.to_i == 200
+      status_code == 200
     end
 
     private
 
+    def status_code
+      @response.code.to_i
+    end
+
+    def content_type
+      @response['content-type']
+    end
+
     def json?
-      @response['content-type'] =~ /json/
+      content_type =~ /json/
     end
 
     def symbolize_keys(hash)

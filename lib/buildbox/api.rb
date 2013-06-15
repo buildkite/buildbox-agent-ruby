@@ -94,7 +94,7 @@ module Buildbox
         Buildbox.logger.debug "#{method.to_s.upcase} #{uri}"
       else
         request.body = JSON.dump(payload)
-        Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{payload.inspect}"
+        Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{payload.inspect} (#{request.body.bytesize} bytes)"
       end
 
       Response.new http(uri).request(request)
