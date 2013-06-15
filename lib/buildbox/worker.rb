@@ -1,5 +1,5 @@
 module Buildbox
-  class Queue
+  class Worker
     def process
       if scheduled = api.builds.payload.first
         start Build.new(scheduled)
@@ -10,14 +10,7 @@ module Buildbox
 
     def start(build)
       api.update_build_state(build.uuid, 'started')
-
-      build.start do |result|
-        json         = result.as_json
-        json[:state] = json.delete(:finished) ? 'finished' : 'started'
-
-        api.update_build_result_async(build.uuid, json.delete(:uuid), json)
-      end
-
+      build.start Buildbox::Observer.new(api, build.uuid)
       api.update_build_state_async(build.uuid, 'finished')
     end
 

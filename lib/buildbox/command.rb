@@ -15,6 +15,11 @@ module Buildbox
       read_io, write_io, pid = nil
       result = Buildbox::Result.new(command)
 
+      # hack: this is so the observer class can raise a started event.
+      # instead of having a block passed to this command, we should implement
+      # a proper command observer
+      yield result
+
       begin
         dir = File.expand_path(@path)
 

@@ -18,7 +18,7 @@ module Buildbox
 
         loop do
           reload_configuration
-          Buildbox::Queue.new.process
+          Buildbox::Worker.new.process
           wait_for_interval
         end
       rescue => e

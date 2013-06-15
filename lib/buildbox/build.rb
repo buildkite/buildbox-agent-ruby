@@ -9,8 +9,8 @@ module Buildbox
       @config     = options[:config]
     end
 
-    def start(&block)
-      @block   = block
+    def start(observer = nil)
+      @observer = observer
 
       unless build_path.exist?
         setup_build_path
@@ -52,13 +52,19 @@ module Buildbox
     end
 
     def run(command)
-      path = build_path if build_path.exist?
+      path    = build_path if build_path.exist?
+      started = false
 
       result = Buildbox::Command.new(path).run(command) do |result, chunk|
-        @block.call(result)
+        if started
+          @observer.chunk(result)
+        else
+          @observer.started(result)
+          started = true
+        end
       end
 
-      @block.call(result)
+      @observer.finished(result)
 
       result
     end

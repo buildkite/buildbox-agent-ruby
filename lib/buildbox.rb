@@ -5,11 +5,12 @@ require "buildbox/build"
 require "buildbox/version"
 require "buildbox/client"
 require "buildbox/api"
-require "buildbox/queue"
+require "buildbox/worker"
 require "buildbox/pid_file"
 require "buildbox/configuration"
 require "buildbox/auth"
 require "buildbox/response"
+require "buildbox/observer"
 
 module Buildbox
   require 'fileutils'
