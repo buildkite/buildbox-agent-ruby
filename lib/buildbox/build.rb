@@ -73,7 +73,7 @@ module Buildbox
 
       # flag the build as failing, so we don't run any more commands.
       # this is a little hacky.
-      @failed = true if result.success?
+      @failed = true unless result.success?
 
       result
     end
