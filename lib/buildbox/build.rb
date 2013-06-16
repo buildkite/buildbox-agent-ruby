@@ -7,6 +7,7 @@ module Buildbox
       @repository = options[:repository]
       @commit     = options[:commit]
       @config     = options[:config]
+      @failed     = false
     end
 
     def start(observer = nil)
@@ -52,6 +53,10 @@ module Buildbox
     end
 
     def run(command)
+      # don't run anoy more commands if the build has failed
+      # at one of the steps
+      return if @failed
+
       path    = build_path if build_path.exist?
       started = false
 
@@ -65,6 +70,10 @@ module Buildbox
       end
 
       @observer.finished(result)
+
+      # flag the build as failing, so we don't run any more commands.
+      # this is a little hacky.
+      @failed = true if result.success?
 
       result
     end
