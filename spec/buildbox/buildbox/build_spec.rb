@@ -1,12 +1,14 @@
 require 'spec_helper'
 
 describe Buildbox::Build do
-  let(:build) { Buildbox::Build.new(:uuid => '1234', :repository => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec") }
+  let(:build) { Buildbox::Build.new(:uuid => '1234', :repository => "git@github.com:keithpitt/ci-ruby.git", :commit => "67b15b704e0", :command => "rspec", :config => { :build => { :commands => [ "rspec" ] }}) }
 
   describe "#start" do
     let(:build_path) { double }
     let(:root_path)  { double(:join => build_path) }
-    let(:command)    { double(:run => true, :run! => true) }
+    let(:result)     { double(:success? => true) }
+    let(:command)    { double(:run => result, :run! => result) }
+    let(:observer)   { double.as_null_object }
 
     before do
       Buildbox.stub(:root_path => root_path)
@@ -15,25 +17,19 @@ describe Buildbox::Build do
 
     context "with a new checkout" do
       before do
-        build_path.stub(:exist? => false, :mkpath => true)
-      end
-
-      it "creates a directory for the build" do
-        build_path.should_receive(:mkpath)
-
-        build.start
+        build_path.stub(:exist? => false)
       end
 
       it "creates a folder for the build" do
         root_path.should_receive(:join).with('git-github-com-keithpitt-ci-ruby-git')
 
-        build.start
+        build.start(observer)
       end
 
       it "clones the repo" do
-        command.should_receive(:run!).with(%{git clone "git@github.com:keithpitt/ci-ruby.git" .}).once
+        command.should_receive(:run).with(%{git clone "git@github.com:keithpitt/ci-ruby.git" . -q}).once
 
-        build.start
+        build.start(observer)
       end
     end
 
@@ -43,23 +39,23 @@ describe Buildbox::Build do
       end
 
       it "doesn't checkout the repo again" do
-        command.should_not_receive(:run!).with(%{git clone "git@github.com:keithpitt/ci-ruby.git" .})
+        command.should_not_receive(:run).with(%{git clone "git@github.com:keithpitt/ci-ruby.git" . -q})
 
-        build.start
+        build.start(observer)
       end
 
       it "cleans, fetches and checks out the commit" do
-        command.should_receive(:run!).with(%{git clean -fd}).ordered
-        command.should_receive(:run!).with(%{git fetch}).ordered
-        command.should_receive(:run!).with(%{git checkout -qf "67b15b704e0"}).ordered
+        command.should_receive(:run).with(%{git clean -fd}).ordered
+        command.should_receive(:run).with(%{git fetch}).ordered
+        command.should_receive(:run).with(%{git checkout -qf "67b15b704e0"}).ordered
 
-        build.start
+        build.start(observer)
       end
 
       it "runs the command" do
         command.should_receive(:run).with(%{rspec})
 
-        build.start
+        build.start(observer)
       end
     end
   end
