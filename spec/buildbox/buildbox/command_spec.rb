@@ -8,14 +8,14 @@ describe Buildbox::Command do
       result = command.run('echo hello world')
 
       result.should be_success
-      result.output.should == 'hello world'
+      result.output.should == "hello world\r\n"
     end
 
     it "redirects stdout to stderr" do
       result = command.run('echo hello world 1>&2')
 
       result.should be_success
-      result.output.should == 'hello world'
+      result.output.should == "hello world\r\n"
     end
 
     it "handles commands that fail and returns the correct status" do
@@ -40,11 +40,13 @@ describe Buildbox::Command do
     it "can collect output in chunks" do
       chunked_output = ''
       result = command.run('echo hello world') do |result, chunk|
-        chunked_output += chunk
+        unless chunk.nil?
+          chunked_output += chunk
+        end
       end
 
       result.should be_success
-      result.output.should == 'hello world'
+      result.output.should == "hello world\r\n"
       chunked_output.should == "hello world\r\n"
     end
 
@@ -53,11 +55,13 @@ describe Buildbox::Command do
 
       chunked_output = ''
       result = command.run('sleep 0.5; echo hello world') do |result, chunk|
-        chunked_output += chunk
+        unless chunk.nil?
+          chunked_output += chunk
+        end
       end
 
       result.should be_success
-      result.output.should == 'hello world'
+      result.output.should == "hello world\r\n"
       chunked_output.should == "hello world\r\n"
     end
 
@@ -68,7 +72,9 @@ describe Buildbox::Command do
       result = nil
       worker_thread = Thread.new do
         result = command.run('echo before sleep; sleep 1; echo after sleep') do |result, chunk|
-          chunked_output += chunk
+          unless chunk.nil?
+            chunked_output += chunk
+          end
         end
       end
 
@@ -81,7 +87,7 @@ describe Buildbox::Command do
 
       result.should_not be_nil
       result.should be_success
-      result.output.should == "before sleep\r\nafter sleep"
+      result.output.should == "before sleep\r\nafter sleep\r\n"
       chunked_output.should == "before sleep\r\nafter sleep\r\n"
     end
 
@@ -106,7 +112,7 @@ describe Buildbox::Command do
     it "captures color'd output" do
       chunked_output = ''
       result = command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')} --color") do |result, chunk|
-        chunked_output += chunk
+        chunked_output += chunk unless chunk.nil?
       end
 
       result.should be_success

@@ -18,7 +18,7 @@ module Buildbox
       # hack: this is so the observer class can raise a started event.
       # instead of having a block passed to this command, we should implement
       # a proper command observer
-      yield result
+      yield result if block_given?
 
       begin
         dir = File.expand_path(@path)
@@ -37,9 +37,7 @@ module Buildbox
           # should have some data to read
           begin
             chunk = read_io.read_nonblock(10240)
-            if block_given?
-              yield result, chunk
-            end
+            yield result, chunk if block_given?
             result.output += chunk
           rescue Errno::EAGAIN, Errno::EWOULDBLOCK
             # do select again
