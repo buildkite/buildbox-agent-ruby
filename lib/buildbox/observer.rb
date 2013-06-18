@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Buildbox
   class Observer
     INTERVAL = 3 # feels like a good number

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Buildbox
   class Auth
     def login(options)

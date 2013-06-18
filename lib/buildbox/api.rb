@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Buildbox
   class API
     require 'net/http'

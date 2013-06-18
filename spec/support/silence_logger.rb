@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 RSpec.configure do |config|
   config.before(:each) do
     logger = Logger.new(StringIO.new)

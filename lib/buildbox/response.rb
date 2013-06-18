@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Buildbox
   class Response
     attr_reader :payload

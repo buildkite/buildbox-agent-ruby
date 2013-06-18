@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module Buildbox
   class Build
     attr_reader :uuid
