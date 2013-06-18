@@ -14,12 +14,18 @@ module Buildbox
 
       begin
         daemonize if @options[:daemon]
+        register_quit_signal
         pid_file.save
 
         loop do
           reload_configuration
           Buildbox::Worker.new.process
-          wait_for_interval
+
+          if @shutdown
+            stop
+          else
+            wait_for_interval
+          end
         end
       rescue => e
         Buildbox.logger.error "#{e.class.name}: #{e.message}"
@@ -34,7 +40,12 @@ module Buildbox
     def stop
       Buildbox.logger.info "Stopping client..."
 
-      Process.kill(:KILL, pid_file.delete)
+      # if the pid is the current process, just exit
+      if $$ == pid_file.pid
+        exit 0
+      else
+        Process.kill(:KILL, pid_file.delete)
+      end
     end
 
     private
@@ -44,6 +55,12 @@ module Buildbox
         Process.daemon
 
         Buildbox.logger = Logger.new(Buildbox.root_path.join("buildbox.log"))
+      end
+    end
+
+    def register_quit_signal
+      trap(:QUIT) do
+        @shutdown = true
       end
     end
 
