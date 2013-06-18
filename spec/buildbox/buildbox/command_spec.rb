@@ -119,5 +119,12 @@ describe Buildbox::Command do
       result.output.should include("32m")
       chunked_output.should include("32m")
     end
+
+    it "supports utf8 characters" do
+      result = command.run('echo -e "hello"; echo -e "\xE2\x98\xA0"')
+
+      result.should be_success
+      result.output.should == "\xE2\x98\xA0\r\n"
+    end
   end
 end
