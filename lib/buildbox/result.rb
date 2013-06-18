@@ -23,11 +23,11 @@ module Buildbox
     end
 
     def append(chunk)
-      @output += chunk
+      @output += Buildbox::UTF8.clean(chunk)
     end
 
     def output
-      Buildbox::UTF8.clean(@output).chomp
+      @output.chomp
     end
 
     def as_json
