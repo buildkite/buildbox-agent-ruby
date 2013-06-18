@@ -126,7 +126,7 @@ describe Buildbox::Command do
       result = command.run('echo "hello"; echo "\xE2\x98\xA0"')
 
       result.should be_success
-      result.output.should == "hello\r\n\xE2\x98\xA0"
+      result.output.should == Buildbox::UTF8.clean("hello\r\n\xE2\x98\xA0").chomp
     end
   end
 end
