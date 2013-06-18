@@ -10,14 +10,14 @@ describe Buildbox::Command do
       result = command.run('echo hello world')
 
       result.should be_success
-      result.output.should == "hello world\r\n"
+      result.output.should == "hello world"
     end
 
     it "redirects stdout to stderr" do
       result = command.run('echo hello world 1>&2')
 
       result.should be_success
-      result.output.should == "hello world\r\n"
+      result.output.should == "hello world"
     end
 
     it "handles commands that fail and returns the correct status" do
@@ -48,7 +48,7 @@ describe Buildbox::Command do
       end
 
       result.should be_success
-      result.output.should == "hello world\r\n"
+      result.output.should == "hello world"
       chunked_output.should == "hello world\r\n"
     end
 
@@ -63,7 +63,7 @@ describe Buildbox::Command do
       end
 
       result.should be_success
-      result.output.should == "hello world\r\n"
+      result.output.should == "hello world"
       chunked_output.should == "hello world\r\n"
     end
 
@@ -89,7 +89,7 @@ describe Buildbox::Command do
 
       result.should_not be_nil
       result.should be_success
-      result.output.should == "before sleep\r\nafter sleep\r\n"
+      result.output.should == "before sleep\r\nafter sleep"
       chunked_output.should == "before sleep\r\nafter sleep\r\n"
     end
 
@@ -123,10 +123,10 @@ describe Buildbox::Command do
     end
 
     it "supports utf8 characters" do
-      result = command.run('echo -e "hello"; echo -e "\xE2\x98\xA0"')
+      result = command.run('echo "hello"; echo "\xE2\x98\xA0"')
 
       result.should be_success
-      result.output.should == "\xE2\x98\xA0\r\n"
+      result.output.should == "hello\r\n\xE2\x98\xA0"
     end
   end
 end

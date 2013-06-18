@@ -38,7 +38,7 @@ module Buildbox
           begin
             chunk = read_io.read_nonblock(10240)
             yield result, chunk if block_given?
-            result.output += chunk
+            result.append chunk
           rescue Errno::EAGAIN, Errno::EWOULDBLOCK
             # do select again
           rescue EOFError, Errno::EIO # EOFError from OSX, EIO is raised by ubuntu
