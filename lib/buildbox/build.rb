@@ -37,7 +37,7 @@ module Buildbox
 
     def fetch_and_checkout
       run %{git clean -fd}
-      run %{git fetch}
+      run %{git fetch -q}
       run %{git checkout -qf "#{@commit}"}
     end
 

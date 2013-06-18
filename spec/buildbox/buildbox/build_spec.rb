@@ -46,7 +46,7 @@ describe Buildbox::Build do
 
       it "cleans, fetches and checks out the commit" do
         command.should_receive(:run).with(%{git clean -fd}).ordered
-        command.should_receive(:run).with(%{git fetch}).ordered
+        command.should_receive(:run).with(%{git fetch -q}).ordered
         command.should_receive(:run).with(%{git checkout -qf "67b15b704e0"}).ordered
 
         build.start(observer)
