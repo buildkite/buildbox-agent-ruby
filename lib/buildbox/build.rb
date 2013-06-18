@@ -8,6 +8,7 @@ module Buildbox
       @commit     = options[:commit]
       @config     = options[:config]
       @failed     = false
+      @results    = []
     end
 
     def start(observer = nil)
@@ -21,7 +22,7 @@ module Buildbox
       fetch_and_checkout
       build
 
-      true
+      @results
     end
 
     private
@@ -63,6 +64,7 @@ module Buildbox
       result = Buildbox::Command.new(path).run(command) do |result, chunk|
         if started
           @observer.chunk(result)
+          @results << result
         else
           @observer.started(result)
           started = true
