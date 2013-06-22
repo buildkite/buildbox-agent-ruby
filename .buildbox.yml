@@ -1,0 +1,3 @@
+script:
+  - "bundle install --local"
+  - "rspec"
