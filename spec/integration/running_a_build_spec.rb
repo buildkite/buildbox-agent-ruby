@@ -5,7 +5,7 @@ require 'spec_helper'
 describe 'running a build' do
   let(:commit)    { "3e0c65433b241ff2c59220f80bcdcd2ebb7e4b96" }
   let(:command)   { "rspec test_spec.rb" }
-  let(:build)     { Buildbox::Build.new(:project_id => 1, :build_id => 1, :repository => FIXTURES_PATH.join("repo.git").to_s, :commit => commit, :config => { :build => { :commands => [ command ] } }) }
+  let(:build)     { Buildbox::Build.new(:project_id => 1, :build_id => 1, :repository => FIXTURES_PATH.join("repo.git").to_s, :commit => commit, :config => { :script => command }) }
   let(:observer)  { double.as_null_object }
 
   before do

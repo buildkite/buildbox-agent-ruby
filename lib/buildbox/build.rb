@@ -44,7 +44,7 @@ module Buildbox
     end
 
     def build
-      @config[:build][:commands].each { |command| run command }
+      [*@config[:script]].each { |command| run command }
     end
 
     def folder_name
