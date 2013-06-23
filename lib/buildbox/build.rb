@@ -19,9 +19,6 @@ module Buildbox
       Buildbox.root_path.join(folder_name)
     end
 
-    def start(observer = nil)
-    end
-
     private
 
     def folder_name

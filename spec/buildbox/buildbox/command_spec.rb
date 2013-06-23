@@ -7,28 +7,28 @@ describe Buildbox::Command do
     it "successfully runs and returns the output from a simple comment" do
       result = Buildbox::Command.run('echo hello world')
 
-      result.should be_success
+      result.exit_status.should == 0
       result.output.should == "hello world"
     end
 
     it "redirects stdout to stderr" do
       result = Buildbox::Command.run('echo hello world 1>&2')
 
-      result.should be_success
+      result.exit_status.should == 0
       result.output.should == "hello world"
     end
 
     it "handles commands that fail and returns the correct status" do
       result = Buildbox::Command.run('(exit 1)')
 
-      result.should_not be_success
+      result.exit_status.should_not == 0
       result.output.should == ''
     end
 
     it "handles running malformed commands" do
       result = Buildbox::Command.run('if (')
 
-      result.should_not be_success
+      result.exit_status.should_not == 0
       # bash 3.2.48 prints "syntax error" in lowercase.
       # freebsd 9.1 /bin/sh prints "Syntax error" with capital S.
       # zsh 5.0.2 prints "parse error" which we do not handle.
@@ -45,7 +45,7 @@ describe Buildbox::Command do
         end
       end
 
-      result.should be_success
+      result.exit_status.should == 0
       result.output.should == "hello world"
       chunked_output.should == "hello world\r\n"
     end
@@ -60,7 +60,7 @@ describe Buildbox::Command do
         end
       end
 
-      result.should be_success
+      result.exit_status.should == 0
       result.output.should == "hello world"
       chunked_output.should == "hello world\r\n"
     end
@@ -84,7 +84,7 @@ describe Buildbox::Command do
       worker_thread.join
 
       result.should_not be_nil
-      result.should be_success
+      result.exit_status.should == 0
       result.output.should == "before sleep\r\nafter sleep"
       chunked_output.should == "before sleep\r\nafter sleep\r\n"
     end
@@ -98,10 +98,10 @@ describe Buildbox::Command do
       end
       thread.join
 
-      result.should_not be_success
+      result.exit_status.should_not == 0
       result.output.should =~ /sillycommandlololol.+not found/
 
-      second_result.should_not be_success
+      second_result.exit_status.should_not == 0
       # osx: `sh: doesntexist.rb: command not found`
       # ubuntu: `sh: 1: doesntexist.rb: not found`
       second_result.output.should =~ /doesntexist.rb:.+not found/
@@ -113,7 +113,7 @@ describe Buildbox::Command do
         chunked_output += chunk unless chunk.nil?
       end
 
-      result.should be_success
+      result.exit_status.should == 0
       result.output.should include("32m")
       chunked_output.should include("32m")
     end
@@ -121,7 +121,7 @@ describe Buildbox::Command do
     it "supports utf8 characters" do
       result = Buildbox::Command.run('echo "hello"; echo "\xE2\x98\xA0"')
 
-      result.should be_success
+      result.exit_status.should == 0
       # just trying to interact with the string that has utf8 in it to make sure that it
       # doesn't blow up like it doesn on osx. this is hacky - need a better test.
       added = result.output + "hello"

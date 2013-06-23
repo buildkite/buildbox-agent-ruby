@@ -9,5 +9,13 @@ module Buildbox
       @uuid   = uuid
       @output = ""
     end
+
+    def success?
+      exit_status == 0
+    end
+
+    def failed?
+      !success?
+    end
   end
 end
