@@ -32,7 +32,7 @@ module Buildbox
 
       @commands.each do |item|
         buffer << magical_line(item.merge(:action => "begin"))
-        buffer << "#{item[:command]};"
+        buffer << item[:command]
         buffer << magical_line(item.merge(:action => "end", :exit_status => "$?"))
       end
 

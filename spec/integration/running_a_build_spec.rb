@@ -26,11 +26,36 @@ describe 'running a build' do
     end
   end
 
+  context 'running a working build with a semi colon in the command' do
+    let(:command) { "rspec test_spec.rb;" }
+
+    it "returns a successfull result" do
+      result = runner.run.last
+      p result
+
+      result.should be_success
+      result.output.should =~ /1 example, 0 failures/
+    end
+  end
+
   context 'running a failing build' do
     let(:commit) { "2d762cdfd781dc4077c9f27a18969efbd186363c" }
 
     it "returns a unsuccessfull result" do
       result = runner.run.last
+
+      result.should_not be_success
+      result.output.should =~ /1 example, 1 failure/
+    end
+  end
+
+  context 'running a failing build that has commands after the one that failed' do
+    let(:command) { [ "rspec test_spec.rb", "echo 'hey its awesome'" ] }
+    let(:commit) { "2d762cdfd781dc4077c9f27a18969efbd186363c" }
+
+    it "returns a unsuccessfull result" do
+      result = runner.run.last
+      p result
 
       result.should_not be_success
       result.output.should =~ /1 example, 1 failure/
