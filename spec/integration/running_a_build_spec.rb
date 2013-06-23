@@ -50,12 +50,10 @@ describe 'running a build' do
   end
 
   context 'running a failing build that has commands after the one that failed' do
-    let(:command) { [ "rspec test_spec.rb", "echo 'hey its awesome'" ] }
-    let(:commit) { "2d762cdfd781dc4077c9f27a18969efbd186363c" }
+    let(:command) { [ "bash -c 'echo fail || exit 1'", "echo 'oh no you didnt!'" ] }
 
     it "returns a unsuccessfull result" do
       result = runner.run.last
-      p result
 
       result.should_not be_success
       result.output.should =~ /1 example, 1 failure/
