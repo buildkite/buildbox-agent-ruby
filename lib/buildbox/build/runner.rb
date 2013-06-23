@@ -17,7 +17,7 @@ module Buildbox
     end
 
     def run
-      Buildbox::Command.run(@script.to_s) do |chunk|
+      result = Buildbox::Command.run(@script.to_s) do |chunk|
         parse_chunk(chunk)
       end
 
@@ -27,21 +27,22 @@ module Buildbox
     private
 
     def parse_chunk(chunk)
-      parts = chunk.split(Buildbox::Script::MAGICAL_LINE_REGEX)
+      parts = Buildbox::Script.split(chunk)
 
       parts.each do |part|
-        if is_buildbox_line?(part)
-          buildbox, action, uuid, info = split_buildbox_line(part)
+        if Buildbox::Script.matches?(part)
+          info = Buildbox::Script.parse(part)
 
-          if action == 'begin'
-            @parts << @current_part = Buildbox::Build::Part.new(uuid, info)
+          if info['action'] == 'begin'
+            @parts << @current_part = Buildbox::Build::Part.new(info['identifier'], info['command'])
 
             @observer.started(@current_part)
-          elsif action == 'end'
-            @current_part.output.strip!
-            @current_part.exit_status = info.to_i
+          elsif info['action'] == 'end'
+            @current_part.output      = @current_part.output.strip.chomp
+            @current_part.exit_status = info['exit_status'].to_i
 
             @observer.finished(@current_part)
+            @current_part = nil
           end
         elsif @current_part
           @current_part.output << part
@@ -49,14 +50,6 @@ module Buildbox
           @observer.updated(@current_part)
         end
       end
-    end
-
-    def is_buildbox_line?(line)
-      line.match(Buildbox::Script::MAGICAL_LINE_REGEX)
-    end
-
-    def split_buildbox_line(line)
-      line.split(Buildbox::Script::MAGICAL_LINE_DIVIDER_REGEX)
     end
   end
 end

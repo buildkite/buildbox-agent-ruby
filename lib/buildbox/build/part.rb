@@ -2,7 +2,7 @@
 
 module Buildbox
   class Build::Part
-    attr_reader :uuid
+    attr_reader :uuid, :command
     attr_accessor :output, :exit_status
 
     def initialize(uuid, command)

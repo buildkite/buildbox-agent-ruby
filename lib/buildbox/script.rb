@@ -5,23 +5,35 @@ module Buildbox
     MAGICAL_LINE_REGEX = /(buildbox:(?:begin|end)\:\w{8}-\w{4}-\w{4}-\w{4}-\w{12}(?:\:\d+)?)/
     MAGICAL_LINE_DIVIDER_REGEX = /:/
 
+    def self.parse(line)
+      json = line.chomp.match(/buildbox-begin\:(.+)?\:buildbox-end/)[1]
+
+      JSON.parse(json)
+    end
+
+    def self.matches?(line)
+      !!line.chomp.match(/buildbox-begin\:(.+)\:buildbox-end/)
+    end
+
+    def self.split(chunk)
+      chunk.split(/(buildbox-begin\:.+?\:buildbox-end)/)
+    end
+
     def initialize
       @commands = []
     end
 
     def queue(identifier, command)
-      @commands << [ identifier, command ]
+      @commands << { :identifier => identifier, :command => command }
     end
 
     def to_s
       buffer = []
 
-      @commands.each do |command|
-        identifier, line = command
-
-        buffer << magical_line("begin", identifier, line)
-        buffer << "#{line};"
-        buffer << magical_line("end", identifier, line, "$?")
+      @commands.each do |item|
+        buffer << magical_line(item.merge(:action => "begin"))
+        buffer << "#{item[:command]};"
+        buffer << magical_line(item.merge(:action => "end", :exit_status => "$?"))
       end
 
       buffer.join("\n")
@@ -29,9 +41,8 @@ module Buildbox
 
     private
 
-    def magical_line(action, info, command, extra = nil)
-      line = [ "buildbox", action, info ]
-      line << extra if extra
+    def magical_line(json)
+      line = [ "buildbox-begin", JSON.dump(json), "buildbox-end" ]
 
       %{echo #{line.join(":").inspect};}
     end

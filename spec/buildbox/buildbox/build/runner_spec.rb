@@ -8,25 +8,28 @@ describe Buildbox::Build::Runner do
   describe "#run" do
     it "watches for magical points in the output and constructs result objects accordingly" do
       output1 = <<-OUTPUT
-buildbox:begin:546a5ce1-c43b-4d12-b750-8b0fae8ec1afbuildbox:end:546a5ce1-c43b-4d12-b750-8b0fae8ec1af:0
-buildbox:begin:2df513bc-68d2-49c8-85eb-acba41a9a2ca
-cloned
+buildbox-begin:{"identifier":"1","command":"cd hello","action":"begin"}:buildbox-end
       OUTPUT
-      output2 = "great"
+      output2 = "lol.sh: line 2: cd: hello: No such file or directory"
       output3 = <<-OUTPUT
-awesomebuildbox:end:2df513bc-68d2-49c8-85eb-acba41a9a2ca:0
+buildbox-begin:{"identifier":"1","command":"cd hello","action":"end","exit_status":"0"}:buildbox-endbuildbox-begin:{"identifier":"2","command":"say \\"hello\\";","action":"begin"}:buildbox-end
       OUTPUT
       output4 = <<-OUTPUT
-buildbox:begin:799932c3-8199-4ede-94be-9138528ca25f
-awesome output is awesopme
-buildbox:end:799932c3-8199-4ede-94be-9138528ca25f:1
+hellobuildbox-begin:{"identifier":"2","command":"say \\"hello\\";","action":"end","exit_status":"1"}:buildbox-end
       OUTPUT
 
       Buildbox::Command.stub(:run).and_yield(output1).and_yield(output2).and_yield(output3).and_yield(output4)
+      parts = runner.run
 
-      runner.run
+      parts[0].uuid.should == "1"
+      parts[0].command.should == "cd hello"
+      parts[0].output.should == "lol.sh: line 2: cd: hello: No such file or directory"
+      parts[0].exit_status.should == 0
 
-      pending
+      parts[1].uuid.should == "2"
+      parts[1].command.should == "say \"hello\";"
+      parts[1].output.should == "hello"
+      parts[1].exit_status.should == 1
     end
   end
 end
