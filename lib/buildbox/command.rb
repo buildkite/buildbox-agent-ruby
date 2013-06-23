@@ -1,8 +1,7 @@
+require 'pty'
+
 module Buildbox
   class Command
-    require 'pty'
-
-    class Error < StandardError; end
 
     def initialize(path = nil, read_interval = nil)
       @path          = path || "."
@@ -54,16 +53,6 @@ module Buildbox
       # output may be invalid UTF-8, as it is produced by the build command.
       result.finished    = true
       result.exit_status = $?.exitstatus
-
-      result
-    end
-
-    def run!(command)
-      result = run(command)
-
-      unless result.success?
-        raise Error, "Failed to run '#{command}': #{result.output}"
-      end
 
       result
     end

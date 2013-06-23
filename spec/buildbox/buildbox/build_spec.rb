@@ -9,7 +9,7 @@ describe Buildbox::Build do
     let(:build_path) { double }
     let(:root_path)  { double(:join => build_path) }
     let(:result)     { double(:success? => true) }
-    let(:command)    { double(:run => result, :run! => result) }
+    let(:command)    { double(:run => result) }
     let(:observer)   { double.as_null_object }
 
     before do
