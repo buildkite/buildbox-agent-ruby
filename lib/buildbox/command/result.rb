@@ -1,42 +1,13 @@
 # encoding: UTF-8
 
 module Buildbox
-  class Command::Result
-    attr_reader :uuid, :command
-    attr_accessor :finished, :exit_status
-
-    def initialize(uuid, command)
-      @uuid     = uuid
-      @output   = ""
-      @finished = false
-      @command  = command
-    end
-
-    def finished?
-      finished
-    end
-
+  class Command::Result < Struct.new(:command, :output, :exit_status)
     def success?
       exit_status == 0
     end
 
     def failed?
       !success?
-    end
-
-    def append(chunk)
-      @output += Buildbox::UTF8.clean(chunk)
-    end
-
-    def output
-      @output.chomp
-    end
-
-    def as_json
-      { :uuid        => @uuid,
-        :command     => @command,
-        :output      => output,
-        :exit_status => @exit_status }
     end
   end
 end

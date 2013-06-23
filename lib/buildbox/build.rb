@@ -2,7 +2,7 @@
 
 module Buildbox
   class Build
-    attr_reader :uuid
+    attr_reader :uuid, :repository, :commit, :commands
 
     def initialize(options)
       @uuid       = options[:uuid]
@@ -13,46 +13,21 @@ module Buildbox
       @results    = []
     end
 
+    def commands
+      [*@config[:script]]
+    end
+
+    def path
+      Buildbox.root_path.join folder_name
+    end
+
     def start(observer = nil)
-      @observer = observer
-
-      unless build_path.exist?
-        setup_build_path
-        clone_repository
-      end
-
-      fetch_and_checkout
-      build
-
-      @results
     end
 
     private
 
-    def setup_build_path
-      run %{mkdir -p "#{build_path}"}
-    end
-
-    def clone_repository
-      run %{git clone "#{@repository}" . -q}
-    end
-
-    def fetch_and_checkout
-      run %{git clean -fd}
-      run %{git fetch -q}
-      run %{git checkout -qf "#{@commit}"}
-    end
-
-    def build
-      [*@config[:script]].each { |command| run command }
-    end
-
     def folder_name
       @repository.gsub(/[^a-zA-Z0-9]/, '-')
-    end
-
-    def build_path
-      Buildbox.root_path.join folder_name
     end
 
     def run(command)

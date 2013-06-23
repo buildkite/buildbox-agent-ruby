@@ -3,32 +3,30 @@
 require "spec_helper"
 
 describe Buildbox::Command do
-  let(:command) { Buildbox::Command.new }
-
   describe "#run" do
     it "successfully runs and returns the output from a simple comment" do
-      result = command.run('echo hello world')
+      result = Buildbox::Command.run('echo hello world')
 
       result.should be_success
       result.output.should == "hello world"
     end
 
     it "redirects stdout to stderr" do
-      result = command.run('echo hello world 1>&2')
+      result = Buildbox::Command.run('echo hello world 1>&2')
 
       result.should be_success
       result.output.should == "hello world"
     end
 
     it "handles commands that fail and returns the correct status" do
-      result = command.run('(exit 1)')
+      result = Buildbox::Command.run('(exit 1)')
 
       result.should_not be_success
       result.output.should == ''
     end
 
     it "handles running malformed commands" do
-      result = command.run('if (')
+      result = Buildbox::Command.run('if (')
 
       result.should_not be_success
       # bash 3.2.48 prints "syntax error" in lowercase.
@@ -41,7 +39,7 @@ describe Buildbox::Command do
 
     it "can collect output in chunks" do
       chunked_output = ''
-      result = command.run('echo hello world') do |result, chunk|
+      result = Buildbox::Command.run('echo hello world') do |chunk|
         unless chunk.nil?
           chunked_output += chunk
         end
@@ -53,10 +51,10 @@ describe Buildbox::Command do
     end
 
     it "can collect chunks at paticular intervals" do
-      command = Buildbox::Command.new(nil, 0.1)
+      command = Buildbox::Command.new(nil, :read_interval => 0.1)
 
       chunked_output = ''
-      result = command.run('sleep 0.5; echo hello world') do |result, chunk|
+      result = Buildbox::Command.run('sleep 0.5; echo hello world') do |chunk|
         unless chunk.nil?
           chunked_output += chunk
         end
@@ -67,13 +65,11 @@ describe Buildbox::Command do
       chunked_output.should == "hello world\r\n"
     end
 
-    it 'passes a result object to the block'
-
     it "can collect chunks from within a thread" do
       chunked_output = ''
       result = nil
       worker_thread = Thread.new do
-        result = command.run('echo before sleep; sleep 1; echo after sleep') do |result, chunk|
+        result = Buildbox::Command.run('echo before sleep; sleep 1; echo after sleep') do |chunk|
           unless chunk.nil?
             chunked_output += chunk
           end
@@ -97,8 +93,8 @@ describe Buildbox::Command do
       result = nil
       second_result = nil
       thread = Thread.new do
-        result = command.run('sillycommandlololol')
-        second_result = command.run('export FOO=bar; doesntexist.rb')
+        result = Buildbox::Command.run('sillycommandlololol')
+        second_result = Buildbox::Command.run('export FOO=bar; doesntexist.rb')
       end
       thread.join
 
@@ -113,7 +109,7 @@ describe Buildbox::Command do
 
     it "captures color'd output" do
       chunked_output = ''
-      result = command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')} --color") do |result, chunk|
+      result = Buildbox::Command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')} --color") do |chunk|
         chunked_output += chunk unless chunk.nil?
       end
 
@@ -123,7 +119,7 @@ describe Buildbox::Command do
     end
 
     it "supports utf8 characters" do
-      result = command.run('echo "hello"; echo "\xE2\x98\xA0"')
+      result = Buildbox::Command.run('echo "hello"; echo "\xE2\x98\xA0"')
 
       result.should be_success
       # just trying to interact with the string that has utf8 in it to make sure that it
