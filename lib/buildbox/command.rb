@@ -12,7 +12,7 @@ module Buildbox
       Buildbox.logger.debug(command)
 
       read_io, write_io, pid = nil
-      result = Buildbox::Result.new(command)
+      result = Buildbox::Command::Result.new(command)
 
       # hack: this is so the observer class can raise a started event.
       # instead of having a block passed to this command, we should implement
@@ -25,7 +25,7 @@ module Buildbox
         # spawn the process in a pseudo terminal so colors out outputted
         read_io, write_io, pid = PTY.spawn("cd #{dir} && #{command}")
       rescue Errno::ENOENT => e
-        return Buildbox::Result.new(false, e.message)
+        return Buildbox::Command::Result.new(false, e.message)
       end
 
       write_io.close

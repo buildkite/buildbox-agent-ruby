@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 module Buildbox
-  class Result
+  class Command::Result
     require 'securerandom'
 
     attr_reader :uuid, :command

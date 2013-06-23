@@ -1,16 +1,16 @@
-require "buildbox/utf8"
-require "buildbox/command"
-require "buildbox/result"
+require "buildbox/api"
+require "buildbox/api/response"
 require "buildbox/build"
+require "buildbox/build/observer"
+require "buildbox/command"
+require "buildbox/command/result"
+require "buildbox/utf8"
 require "buildbox/version"
 require "buildbox/client"
-require "buildbox/api"
 require "buildbox/worker"
 require "buildbox/pid_file"
 require "buildbox/configuration"
 require "buildbox/auth"
-require "buildbox/response"
-require "buildbox/observer"
 
 module Buildbox
   require 'fileutils'
