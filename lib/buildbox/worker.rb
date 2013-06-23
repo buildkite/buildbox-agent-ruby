@@ -12,7 +12,7 @@ module Buildbox
 
     def start(build)
       api.update_build_state(build.uuid, 'started')
-      build.start Buildbox::Observer.new(api, build.uuid)
+      Buildbox::Build::Runner.run(build, Buildbox::Observer.new(api, build.uuid))
       api.update_build_state_async(build.uuid, 'finished')
     end
 

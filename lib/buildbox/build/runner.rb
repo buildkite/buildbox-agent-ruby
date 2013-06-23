@@ -3,6 +3,10 @@
 # The runner generates a script and runs it
 module Buildbox
   class Build::Runner
+    def self.run(build, observer)
+      new(build, observer).run
+    end
+
     def initialize(build, observer)
       @build    = build
       @observer = observer
