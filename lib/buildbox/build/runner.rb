@@ -31,16 +31,22 @@ module Buildbox
 
       parts.each do |part|
         if is_buildbox_line?(part)
-          buildbox, action, uuid, exit_status = split_buildbox_line(part)
+          buildbox, action, uuid, info = split_buildbox_line(part)
 
           if action == 'begin'
-            @parts << @current_part = Buildbox::Build::Part.new(uuid)
+            @parts << @current_part = Buildbox::Build::Part.new(uuid, info)
+
+            @observer.started(@current_part)
           elsif action == 'end'
             @current_part.output.strip!
-            @current_part.exit_status = exit_status.to_i
+            @current_part.exit_status = info.to_i
+
+            @observer.finished(@current_part)
           end
         elsif @current_part
           @current_part.output << part
+
+          @observer.updated(@current_part)
         end
       end
     end

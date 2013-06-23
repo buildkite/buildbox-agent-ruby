@@ -5,7 +5,7 @@ module Buildbox
     def started(result)
     end
 
-    def chunk(result)
+    def updated(result)
     end
 
     def finished(result)
