@@ -3,9 +3,9 @@ require 'pty'
 module Buildbox
   class Command
 
-    def initialize(path = nil, read_interval = nil)
-      @path          = path || "."
-      @read_interval = read_interval || 5
+    def initialize(path = nil, observer = nil)
+      @path     = path || "."
+      @observer = observer
     end
 
     def run(command)
@@ -31,7 +31,7 @@ module Buildbox
       write_io.close
 
       loop do
-        fds, = IO.select([read_io], nil, nil, @read_interval)
+        fds, = IO.select([read_io], nil, nil, read_interval)
         if fds
           # should have some data to read
           begin
@@ -50,11 +50,16 @@ module Buildbox
       read_io.close
       Process.waitpid(pid)
 
-      # output may be invalid UTF-8, as it is produced by the build command.
       result.finished    = true
       result.exit_status = $?.exitstatus
 
       result
+    end
+
+    private
+
+    def read_interval
+      5
     end
   end
 end
