@@ -1,4 +1,5 @@
 require 'pty'
+require 'securerandom'
 
 module Buildbox
   class Command
@@ -12,7 +13,7 @@ module Buildbox
       Buildbox.logger.debug(command)
 
       read_io, write_io, pid = nil
-      result = Buildbox::Command::Result.new(command)
+      result = Buildbox::Command::Result.new(SecureRandom.uuid, command)
 
       # hack: this is so the observer class can raise a started event.
       # instead of having a block passed to this command, we should implement

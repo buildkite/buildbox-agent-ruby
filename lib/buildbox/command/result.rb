@@ -2,13 +2,11 @@
 
 module Buildbox
   class Command::Result
-    require 'securerandom'
-
     attr_reader :uuid, :command
     attr_accessor :finished, :exit_status
 
-    def initialize(command)
-      @uuid     = SecureRandom.uuid
+    def initialize(uuid, command)
+      @uuid     = uuid
       @output   = ""
       @finished = false
       @command  = command
@@ -20,6 +18,10 @@ module Buildbox
 
     def success?
       exit_status == 0
+    end
+
+    def failed?
+      !success?
     end
 
     def append(chunk)
