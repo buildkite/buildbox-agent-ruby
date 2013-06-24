@@ -45,7 +45,7 @@ buildbox-begin:{"identifier":"2","command":"echo \\"hello\\"","action":"end","ex
       script.queue "1", %{cd hello}
       script.queue "2", %{say "hello"}
 
-      script.to_s.should == "echo \"buildbox-begin:{\\\"identifier\\\":\\\"1\\\",\\\"command\\\":\\\"cd hello\\\",\\\"action\\\":\\\"begin\\\"}:buildbox-end\";\ncd hello\necho \"buildbox-begin:{\\\"identifier\\\":\\\"1\\\",\\\"command\\\":\\\"cd hello\\\",\\\"action\\\":\\\"end\\\",\\\"exit_status\\\":\\\"$?\\\"}:buildbox-end\";\necho \"buildbox-begin:{\\\"identifier\\\":\\\"2\\\",\\\"command\\\":\\\"say \\\\\\\"hello\\\\\\\"\\\",\\\"action\\\":\\\"begin\\\"}:buildbox-end\";\nsay \"hello\"\necho \"buildbox-begin:{\\\"identifier\\\":\\\"2\\\",\\\"command\\\":\\\"say \\\\\\\"hello\\\\\\\"\\\",\\\"action\\\":\\\"end\\\",\\\"exit_status\\\":\\\"$?\\\"}:buildbox-end\";"
+      script.to_s.should == "#!/bin/bash\nset -e\necho \"buildbox-begin:{\\\"identifier\\\":\\\"1\\\",\\\"command\\\":\\\"cd hello\\\",\\\"action\\\":\\\"begin\\\"}:buildbox-end\";\ncd hello\necho \"buildbox-begin:{\\\"identifier\\\":\\\"1\\\",\\\"command\\\":\\\"cd hello\\\",\\\"action\\\":\\\"end\\\",\\\"exit_status\\\":\\\"$?\\\"}:buildbox-end\";\necho \"buildbox-begin:{\\\"identifier\\\":\\\"2\\\",\\\"command\\\":\\\"say \\\\\\\"hello\\\\\\\"\\\",\\\"action\\\":\\\"begin\\\"}:buildbox-end\";\nsay \"hello\"\necho \"buildbox-begin:{\\\"identifier\\\":\\\"2\\\",\\\"command\\\":\\\"say \\\\\\\"hello\\\\\\\"\\\",\\\"action\\\":\\\"end\\\",\\\"exit_status\\\":\\\"$?\\\"}:buildbox-end\";"
     end
   end
 end

@@ -28,7 +28,7 @@ module Buildbox
     end
 
     def to_s
-      script = []
+      script = ["#!/bin/bash", "set -e"]
 
       @commands.each do |item|
         script << magical_line(item.merge(:action => "begin"))

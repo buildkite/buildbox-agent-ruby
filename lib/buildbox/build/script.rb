@@ -16,11 +16,8 @@ module Buildbox
     private
 
     def construct_script
-      unless @build.path.join(".git").exist?
-        queue %{mkdir -p #{escape @build.path}}
-        queue %{git clone #{escape @build.repository} #{escape @build.path} -q}
-      end
-
+      queue %{mkdir -p #{escape @build.path}}
+      queue %{test -d #{@build.path.join(".git").to_s.inspect} || git clone #{escape @build.repository} #{escape @build.path} -q}
       queue %{cd #{escape @build.path}}
       queue %{git clean -fd}
       queue %{git fetch -q}
