@@ -28,15 +28,15 @@ module Buildbox
     end
 
     def to_s
-      buffer = []
+      script = []
 
       @commands.each do |item|
-        buffer << magical_line(item.merge(:action => "begin"))
-        buffer << item[:command]
-        buffer << magical_line(item.merge(:action => "end", :exit_status => "$?"))
+        script << magical_line(item.merge(:action => "begin"))
+        script << item[:command]
+        script << magical_line(item.merge(:action => "end", :exit_status => "$?"))
       end
 
-      buffer.join("\n")
+      script.join("\n")
     end
 
     private
