@@ -9,14 +9,14 @@ describe Buildbox::Build::Runner do
   describe "#run" do
     it "watches for magical points in the output and constructs result objects accordingly" do
       output1 = <<-OUTPUT
-buildbox-begin:{"identifier":"1","command":"cd hello"}:buildbox-end
+buildbox-begin:{"id":"1","command":"cd hello"}:buildbox-end
       OUTPUT
       output2 = "lol.sh: line 2: cd: hello: No such file or directory"
       output3 = <<-OUTPUT
-buildbox-begin:{"identifier":"2","command":"say \\"hello\\";"}:buildbox-endawesome
+buildbox-begin:{"id":"2","command":"say \\"hello\\";"}:buildbox-endawesome
       OUTPUT
       output4 = <<-OUTPUT
-hellobuildbox-begin:{"identifier":"3","command":"say \\"great\\";"}:buildbox-endgreat
+hellobuildbox-begin:{"id":"3","command":"say \\"great\\";"}:buildbox-endgreat
       OUTPUT
 
       Buildbox::Command.stub(:run).and_yield(output1).and_yield(output2).and_yield(output3).and_yield(output4).and_return(result)

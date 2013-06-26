@@ -20,8 +20,8 @@ module Buildbox
       @commands = []
     end
 
-    def queue(identifier, command)
-      @commands << { :identifier => identifier, :command => command }
+    def queue(id, command)
+      @commands << { :id => id, :command => command }
     end
 
     def to_s

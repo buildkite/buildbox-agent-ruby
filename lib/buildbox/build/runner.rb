@@ -48,7 +48,7 @@ module Buildbox
           end
 
           info = Buildbox::Script.parse(part)
-          @parts << @current_part = Buildbox::Build::Part.new(info['identifier'], info['command'])
+          @parts << @current_part = Buildbox::Build::Part.new(info['id'], info['command'])
           @observer.started(@current_part)
         elsif @current_part
           @current_part.output << part
