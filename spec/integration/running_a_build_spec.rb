@@ -60,6 +60,17 @@ describe 'running a build' do
     end
   end
 
+  context 'running a failing build that returns a non standard exit status' do
+    let(:command) { [ "exit 123" ] }
+
+    it "returns a unsuccessfull result" do
+      result = runner.run.last
+
+      result.should_not be_success
+      result.exit_status.should == 123
+    end
+  end
+
   context 'a build that has a command with a syntax error' do
     let(:command) { [ 'if (', 'echo yay' ] }
 

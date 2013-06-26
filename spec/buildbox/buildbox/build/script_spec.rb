@@ -10,7 +10,7 @@ describe Buildbox::Build::Script do
 
   describe "#to_s" do
     it "generates the correct script to run" do
-      script.to_s.should include("rspec\n")
+      script.to_s.should include("rspec")
     end
   end
 end
