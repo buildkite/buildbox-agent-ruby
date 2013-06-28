@@ -99,7 +99,7 @@ module Buildbox
         Buildbox.logger.debug "#{method.to_s.upcase} #{uri} #{payload.inspect} (#{request.body.bytesize} bytes)"
       end
 
-      Response.new http(uri).request(request)
+      API::Response.new http(uri).request(request)
     end
 
     def worker_uuid

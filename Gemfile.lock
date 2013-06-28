@@ -1,0 +1,34 @@
+PATH
+  remote: .
+  specs:
+    buildbox (0.0.4)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.3.4)
+    crack (0.4.0)
+      safe_yaml (~> 0.9.0)
+    diff-lcs (1.2.4)
+    rake (10.1.0)
+    rspec (2.13.0)
+      rspec-core (~> 2.13.0)
+      rspec-expectations (~> 2.13.0)
+      rspec-mocks (~> 2.13.0)
+    rspec-core (2.13.1)
+    rspec-expectations (2.13.0)
+      diff-lcs (>= 1.1.3, < 2.0)
+    rspec-mocks (2.13.1)
+    safe_yaml (0.9.3)
+    webmock (1.11.0)
+      addressable (>= 2.2.7)
+      crack (>= 0.3.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  buildbox!
+  rake
+  rspec
+  webmock
