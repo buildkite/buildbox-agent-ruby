@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 module Buildbox
-  class Response
+  class API::Response
     attr_reader :payload
 
     def initialize(response)

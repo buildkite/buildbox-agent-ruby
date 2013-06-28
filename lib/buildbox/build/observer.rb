@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 module Buildbox
-  class Observer
+  class Build::Observer
     INTERVAL = 3 # feels like a good number
 
     def initialize(api, build_uuid)
@@ -19,7 +19,7 @@ module Buildbox
       update(result.uuid)
     end
 
-    def chunk(result)
+    def updated(result)
       update_on_interval(result.uuid)
     end
 

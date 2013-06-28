@@ -1,33 +1,27 @@
+# encoding: UTF-8
+
 require 'pty'
 
 module Buildbox
   class Command
-
-    def initialize(path = nil, observer = nil)
-      @path     = path || "."
-      @observer = observer
+    def self.run(command, options = {}, &block)
+      new(command, options).run(&block)
     end
 
-    def run(command)
-      Buildbox.logger.debug(command)
+    def initialize(command, options = {})
+      @command       = command
+      @path          = options[:path] || "."
+      @read_interval = options[:read_interval] || 5
+    end
 
+    def run(&block)
+      output = ""
       read_io, write_io, pid = nil
-      result = Buildbox::Result.new(command)
 
-      # hack: this is so the observer class can raise a started event.
-      # instead of having a block passed to this command, we should implement
-      # a proper command observer
-      yield result if block_given?
+      # spawn the process in a pseudo terminal so colors out outputted
+      read_io, write_io, pid = PTY.spawn("cd #{expanded_path} && #{@command}")
 
-      begin
-        dir = File.expand_path(@path)
-
-        # spawn the process in a pseudo terminal so colors out outputted
-        read_io, write_io, pid = PTY.spawn("cd #{dir} && #{command}")
-      rescue Errno::ENOENT => e
-        return Buildbox::Result.new(false, e.message)
-      end
-
+      # we don't need to write to the spawned io
       write_io.close
 
       loop do
@@ -35,9 +29,11 @@ module Buildbox
         if fds
           # should have some data to read
           begin
-            chunk = read_io.read_nonblock(10240)
-            yield result, chunk if block_given?
-            result.append chunk
+            chunk         = read_io.read_nonblock(10240)
+            cleaned_chunk = Buildbox::UTF8.clean(chunk)
+
+            output << cleaned_chunk
+            yield cleaned_chunk if block_given?
           rescue Errno::EAGAIN, Errno::EWOULDBLOCK
             # do select again
           rescue EOFError, Errno::EIO # EOFError from OSX, EIO is raised by ubuntu
@@ -47,19 +43,24 @@ module Buildbox
         # if fds are empty, timeout expired - run another iteration
       end
 
+      # we're done reading, yay!
       read_io.close
+
+      # just wait until its finally finished closing
       Process.waitpid(pid)
 
-      result.finished    = true
-      result.exit_status = $?.exitstatus
-
-      result
+      # the final result!
+      Buildbox::Command::Result.new(@command, output.chomp, $?.exitstatus)
     end
 
     private
 
+    def expanded_path
+      File.expand_path(@path)
+    end
+
     def read_interval
-      5
+      @read_interval
     end
   end
 end
