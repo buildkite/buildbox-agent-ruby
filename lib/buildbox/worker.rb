@@ -11,9 +11,9 @@ module Buildbox
     private
 
     def start(build)
-      # api.update_build_state(build.uuid, 'started')
+      api.update_build_state(build.uuid, 'started')
       Buildbox::Build::Runner.run(build, Buildbox::Build::Observer.new(api, build.uuid))
-      # api.update_build_state_async(build.uuid, 'finished')
+      api.update_build_state_async(build.uuid, 'finished')
     end
 
     def api
