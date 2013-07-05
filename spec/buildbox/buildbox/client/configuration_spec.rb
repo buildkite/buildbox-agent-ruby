@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Buildbox::Configuration do
-  subject(:configuration) { Buildbox::Configuration.new }
+describe Buildbox::Client::Configuration do
+  subject(:configuration) { Buildbox::Client::Configuration.new }
 
   it "has a default endpoint" do
     configuration.endpoint.should =~ /buildbox/

@@ -1,20 +1,25 @@
 require "buildbox/api"
 require "buildbox/api/response"
+
 require "buildbox/build"
 require "buildbox/build/observer"
 require "buildbox/build/null_observer"
 require "buildbox/build/script"
 require "buildbox/build/runner"
 require "buildbox/build/part"
+
 require "buildbox/command"
 require "buildbox/command/result"
+
 require "buildbox/utf8"
 require "buildbox/version"
-require "buildbox/client"
 require "buildbox/worker"
 require "buildbox/pid_file"
 require "buildbox/script"
-require "buildbox/configuration"
+
+require "buildbox/client"
+require "buildbox/client/configuration"
+
 require "buildbox/auth"
 
 module Buildbox
@@ -24,7 +29,7 @@ module Buildbox
 
   class << self
     def configuration
-      @configuration ||= Configuration.load
+      @configuration ||= Client::Configuration.load
     end
 
     def root_path

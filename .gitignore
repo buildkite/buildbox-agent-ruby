@@ -13,3 +13,4 @@ rdoc
 spec/reports
 spec/tmp
 tmp
+.DS_Store

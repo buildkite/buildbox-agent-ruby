@@ -1,12 +1,12 @@
 # encoding: UTF-8
 
+require 'json'
+
 module Buildbox
-  class Configuration
+  class Client::Configuration
     def self.load(*args)
       new(*args).tap &:reload
     end
-
-    require 'json'
 
     attr_accessor :worker_uuid
     attr_accessor :api_key
