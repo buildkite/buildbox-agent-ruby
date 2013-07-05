@@ -38,6 +38,10 @@ module Buildbox
       request(:get, "workers/#{worker_uuid}/builds")
     end
 
+    def get_build_info(build_uuid)
+      request(:get, "workers/#{worker_uuid}/builds/#{build_uuid}")
+    end
+
     def update_build_state_async(*args)
       async :update_build_state, args
     end

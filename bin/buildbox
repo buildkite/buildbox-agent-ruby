@@ -53,6 +53,10 @@ commands['build:manual'] = OptionParser.new do |opts|
   opts.banner = "Usage: buildbox build:manual git@github.com:your/repo.git master"
 end
 
+commands['build:retry'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox build:retry 123"
+end
+
 commands['version'] = OptionParser.new do |opts|
   opts.banner = "Usage: buildbox version"
 end
@@ -101,8 +105,15 @@ if command = args.shift
   end
 
   if command =~ /^build/
+    api = Buildbox::API.new(:api_key => Buildbox.configuration.api_key)
+
     if command == "build:manual"
       build = Buildbox::Build.new(:uuid => SecureRandom.uuid, :repository => args[0], :commit => args[1], :config => { :script => ["rspec"] })
+
+      Buildbox::Build::Runner.run(build, Buildbox::Build::ConsoleObserver.new)
+    elsif command == "build:retry"
+      data  = api.get_build_info(args[0])
+      build = Buildbox::Build.new(data.payload)
 
       Buildbox::Build::Runner.run(build, Buildbox::Build::ConsoleObserver.new)
     end
