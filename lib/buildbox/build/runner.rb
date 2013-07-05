@@ -53,7 +53,7 @@ module Buildbox
         elsif @current_part
           @current_part.output << part
 
-          @observer.updated(@current_part)
+          @observer.updated(@current_part, part)
         end
       end
     end

@@ -12,6 +12,7 @@ help = <<HELP
 
   auth     #  authentication (login, logout)
   monitor  #  monitor builds (start, stop)
+  build    #  run a build in the console (manual, retry)
   version  #  display version
 
 HELP
@@ -46,6 +47,10 @@ end
 
 commands['monitor:stop'] = OptionParser.new do |opts|
   opts.banner = "Usage: buildbox monitor:stop"
+end
+
+commands['build:manual'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox build:manual git@github.com:your/repo.git master"
 end
 
 commands['version'] = OptionParser.new do |opts|
@@ -92,6 +97,14 @@ if command = args.shift
       auth.login(:api_key => args[0])
     elsif command == "auth:logout"
       auth.logout
+    end
+  end
+
+  if command =~ /^build/
+    if command == "build:manual"
+      build = Buildbox::Build.new(:uuid => SecureRandom.uuid, :repository => args[0], :commit => args[1], :config => { :script => ["rspec"] })
+
+      Buildbox::Build::Runner.run(build, Buildbox::Build::ConsoleObserver.new)
     end
   end
 else

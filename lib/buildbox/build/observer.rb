@@ -19,7 +19,7 @@ module Buildbox
       update(result.uuid)
     end
 
-    def updated(result)
+    def updated(result, partial)
       update_on_interval(result.uuid)
     end
 
