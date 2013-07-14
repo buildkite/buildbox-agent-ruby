@@ -10,6 +10,10 @@ class Configuration < Hashie::Dash
   property :worker_uuid
   property :api_endpoint, :default => "http://api.buildbox.dev/v1"
 
+  def update(attributes)
+    replace(attributes) && save
+  end
+
   def save
     File.open(path, 'w+') { |file| file.write(pretty_json) }
   end
@@ -102,10 +106,7 @@ api = API::Client.new
 if Buildbox.config.worker_uuid.nil?
   worker = api.register(`hostname`.chomp)
 
-  Buildbox.config.tap do |config|
-    config.worker_uuid = worker.uuid
-    config.save
-  end
+  Buildbox.config.update(:worker_uuid => worker.uuid)
 end
 
 p api.builds
