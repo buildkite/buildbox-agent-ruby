@@ -4,6 +4,8 @@ PATH
     buildbox (0.0.4)
       celluloid (~> 0.14)
       faraday (~> 0.8)
+      faraday_middleware (~> 0.9)
+      hashie (~> 2.0)
       multi_json (~> 1.7)
 
 GEM
@@ -17,6 +19,9 @@ GEM
     diff-lcs (1.2.4)
     faraday (0.8.7)
       multipart-post (~> 1.1)
+    faraday_middleware (0.9.0)
+      faraday (>= 0.7.4, < 0.9)
+    hashie (2.0.5)
     multi_json (1.7.7)
     multipart-post (1.2.0)
     rake (10.1.0)
