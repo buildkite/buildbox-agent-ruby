@@ -8,10 +8,12 @@ require 'json'
 
 class Configuration < Hashie::Dash
   property :worker_uuid
+  property :team_api_keys
   property :api_endpoint, :default => "http://api.buildbox.dev/v1"
 
   def update(attributes)
-    replace(attributes) && save
+    attributes.each_pair { |key, value| self[key] = value }
+    save
   end
 
   def save
@@ -108,6 +110,8 @@ if Buildbox.config.worker_uuid.nil?
 
   Buildbox.config.update(:worker_uuid => worker.uuid)
 end
+
+# Buildbox.config.update(:user_api_key => "29863bcbd054c6624741", :team_api_keys => "22e2c6baf8cd79c272fb")
 
 p api.builds
 
