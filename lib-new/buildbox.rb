@@ -7,8 +7,7 @@ require 'pathname'
 require 'json'
 
 class Configuration < Hashie::Dash
-  property :worker_uuid
-  property :team_api_keys
+  property :worker_access_token
   property :api_endpoint, :default => "http://api.buildbox.dev/v1"
 
   def update(attributes)
@@ -66,12 +65,8 @@ module API
       @config = config
     end
 
-    def register(hostname)
-      post("workers", :hostname => hostname)
-    end
-
-    def builds
-      get("workers/#{@config.worker_uuid}/builds")
+    def info
+      get("workers/#{@config.worker_access_token}")
     end
 
     private
@@ -105,15 +100,12 @@ end
 
 api = API::Client.new
 
-if Buildbox.config.worker_uuid.nil?
-  worker = api.register(`hostname`.chomp)
+Buildbox.config.update(:worker_access_token => "ef99421a6a07dde79974")
 
-  Buildbox.config.update(:worker_uuid => worker.uuid)
-end
+p api.info
 
 # Buildbox.config.update(:user_api_key => "29863bcbd054c6624741", :team_api_keys => "22e2c6baf8cd79c272fb")
 
-p api.builds
 
 =begin
 require 'celluloid'
