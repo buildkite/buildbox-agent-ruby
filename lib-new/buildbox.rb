@@ -7,8 +7,8 @@ require 'pathname'
 require 'json'
 
 class Configuration < Hashie::Dash
-  property :worker_access_token
-  property :api_endpoint, :default => "http://api.buildbox.dev/v1"
+  property :worker_access_tokens, :default => []
+  property :api_endpoint, ,       :default => "http://api.buildbox.dev/v1"
 
   def update(attributes)
     attributes.each_pair { |key, value| self[key] = value }
@@ -65,8 +65,12 @@ module API
       @config = config
     end
 
-    def info
-      get("workers/#{@config.worker_access_token}")
+    def worker(access_token: access_token, hostname: hostname)
+      put("workers/#{access_token}", :hostname => hostname)
+    end
+
+    def scheduled_builds(project)
+      get(project.scheduled_builds_url)
     end
 
     private
@@ -92,17 +96,30 @@ module API
       end.body
     end
 
+    def put(path, body = {})
+      connection.put(path) do |request|
+        request.body = body
+      end.body
+    end
+
     def get(path)
       connection.get(path).body
     end
   end
 end
 
+
+Buildbox.config.update(:worker_access_tokens=> [ "ef99421a6a07dde79974" ])
+
 api = API::Client.new
 
-Buildbox.config.update(:worker_access_token => "ef99421a6a07dde79974")
-
-p api.info
+Buildbox.config.worker_access_tokens.each do |access_token|
+  api.worker(:access_token => access_token, :hostname => `hostname`.chomp).projects.each do |project|
+    api.scheduled_builds(project).each do |build|
+      p build
+    end
+  end
+end
 
 # Buildbox.config.update(:user_api_key => "29863bcbd054c6624741", :team_api_keys => "22e2c6baf8cd79c272fb")
 
