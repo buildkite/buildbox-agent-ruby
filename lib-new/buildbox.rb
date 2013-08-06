@@ -8,7 +8,7 @@ require 'json'
 
 class Configuration < Hashie::Dash
   property :worker_access_tokens, :default => []
-  property :api_endpoint, ,       :default => "http://api.buildbox.dev/v1"
+  property :api_endpoint,         :default => "http://api.buildbox.dev/v1"
 
   def update(attributes)
     attributes.each_pair { |key, value| self[key] = value }
@@ -108,24 +108,91 @@ module API
   end
 end
 
+class Environment < Hash
+  def initialize(environment)
+    @environment = environment
+    self['FOO'] = "BAR"
+    self['TEST'] = "this is a test"
+  end
 
-Buildbox.config.update(:worker_access_tokens=> [ "ef99421a6a07dde79974" ])
+  def to_s
+    to_a.map do |key, value|
+      %{#{key}=#{value.inspect}}
+    end.join(" ")
+  end
+end
+
+require 'celluloid'
+require 'tempfile'
+
+class Script
+  def initialize(build)
+    @build = build
+  end
+
+  def name
+    "#{@build.project.team.name}-#{@build.project.name}-#{@build.number}"
+  end
+
+  def path
+    Buildbox.root_path.join(name)
+  end
+
+  def save
+    File.open(path, 'w+') { |file| file.write(@build.script) }
+  end
+
+  def delete
+    File.delete(path)
+  end
+end
+
+class Builder
+  include Celluloid
+
+  def initialize(build)
+    @build = build
+  end
+
+  def start
+    script.save
+    puts `#{command}`
+    script.delete
+  end
+
+  private
+
+  def command
+    %{#{environment} sh #{script.path}}
+  end
+
+  def script
+    @script ||= Script.new(@build)
+  end
+
+  def environment
+    Environment.new(@build.env).tap do |env|
+      env['BUILDBOX_BUILD_NUMBER'] = @build.number
+    end
+  end
+end
+
+Buildbox.config.update(:worker_access_tokens=> [ "7f068724b9c3215f1d5c" ])
 
 api = API::Client.new
 
 Buildbox.config.worker_access_tokens.each do |access_token|
   api.worker(:access_token => access_token, :hostname => `hostname`.chomp).projects.each do |project|
-    api.scheduled_builds(project).each do |build|
-      p build
+    running_builds = api.scheduled_builds(project).map do |build|
+      Builder.new(build).future(:start)
     end
+
+    # wait for all the running builds to finish
+    running_builds.map(&:value)
   end
 end
 
-# Buildbox.config.update(:user_api_key => "29863bcbd054c6624741", :team_api_keys => "22e2c6baf8cd79c272fb")
-
-
 =begin
-require 'celluloid'
 
 class Thingy
   include Celluloid
