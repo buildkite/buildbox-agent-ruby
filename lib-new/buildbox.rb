@@ -73,6 +73,10 @@ module API
       get(project.scheduled_builds_url)
     end
 
+    def update_build(build)
+      put(build.url, :output => build.output, :exit_status => build.exit_status)
+    end
+
     private
 
     def connection
@@ -106,24 +110,39 @@ module API
       connection.get(path).body
     end
   end
+
+  require 'celluloid/autostart'
+
+  class Observer
+    include Celluloid
+    include Celluloid::Notifications
+
+    def initialize(api)
+      @api = api
+    end
+
+    def setup
+      %w(start tick finish).each { |event| subscribe(event, :update) }
+    end
+
+    def update(event, build)
+      p event
+      @api.update_build(build)
+    end
+  end
 end
 
-class Environment < Hash
+class Environment
   def initialize(environment)
     @environment = environment
-    self['FOO'] = "BAR"
-    self['TEST'] = "this is a test"
   end
 
   def to_s
-    to_a.map do |key, value|
+    @environment.to_a.map do |key, value|
       %{#{key}=#{value.inspect}}
     end.join(" ")
   end
 end
-
-require 'celluloid'
-require 'tempfile'
 
 class Script
   def initialize(build)
@@ -147,17 +166,28 @@ class Script
   end
 end
 
+require 'celluloid'
+
 class Builder
   include Celluloid
+  include Celluloid::Notifications
+
+  attr_reader :build, :output
 
   def initialize(build)
     @build = build
   end
 
   def start
+    publish('start', build)
     script.save
-    puts `#{command}`
+
+    build.output = `#{command}`
+    build.exit_status = $?.to_i
+    publish('tick', build)
+
     script.delete
+    publish('finish', build)
   end
 
   private
@@ -171,15 +201,16 @@ class Builder
   end
 
   def environment
-    Environment.new(@build.env).tap do |env|
-      env['BUILDBOX_BUILD_NUMBER'] = @build.number
-    end
+    @environment ||= Environment.new(@build.env)
   end
 end
 
-Buildbox.config.update(:worker_access_tokens=> [ "7f068724b9c3215f1d5c" ])
+Buildbox.config.update(:worker_access_tokens=> [ "5f6e1a888c8ef547f6b3" ])
 
 api = API::Client.new
+
+observer = API::Observer.new(api)
+observer.setup
 
 Buildbox.config.worker_access_tokens.each do |access_token|
   api.worker(:access_token => access_token, :hostname => `hostname`.chomp).projects.each do |project|
@@ -192,30 +223,5 @@ Buildbox.config.worker_access_tokens.each do |access_token|
   end
 end
 
-=begin
-
-class Thingy
-  include Celluloid
-
-  def initialize(name, i)
-    @name = name
-    @i =i
-  end
-
-  def start
-    puts "begin #{@name}"
-    sleep 2 * @i
-    puts "done #{@name}"
-    "success!"
-  end
-end
-
-futures = []
-3.times do |i|
-  futures << runner = Thingy.new("keith", i).future(:start)
-end
-
-futures.each do |v|
-  p v.value
-end
-=end
+# wait for the api calls to have been registered
+sleep 5
