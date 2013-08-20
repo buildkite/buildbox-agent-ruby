@@ -205,23 +205,44 @@ class Builder
   end
 end
 
-Buildbox.config.update(:worker_access_tokens=> [ "5f6e1a888c8ef547f6b3" ])
+class Server
+  INTERVAL = 5
 
-api = API::Client.new
+  def start
+    observer.setup
 
-observer = API::Observer.new(api)
-observer.setup
+    loop do
+      access_tokens.each do |access_token|
+        api.worker(:access_token => access_token, :hostname => `hostname`.chomp).projects.each do |project|
+          running_builds = api.scheduled_builds(project).map do |build|
+            Builder.new(build).future(:start)
+          end
 
-Buildbox.config.worker_access_tokens.each do |access_token|
-  api.worker(:access_token => access_token, :hostname => `hostname`.chomp).projects.each do |project|
-    running_builds = api.scheduled_builds(project).map do |build|
-      Builder.new(build).future(:start)
+          # wait for all the running builds to finish
+          running_builds.map(&:value)
+
+          sleep INTERVAL
+        end
+      end
     end
+  end
 
-    # wait for all the running builds to finish
-    running_builds.map(&:value)
+  private
+
+  def api
+    @api ||= API::Client.new
+  end
+
+  def observer
+    @observer ||= API::Observer.new(api)
+  end
+
+  def access_tokens
+    Buildbox.config.worker_access_tokens
   end
 end
 
-# wait for the api calls to have been registered
-sleep 5
+Buildbox.config.update(:worker_access_tokens=> [ "5f6e1a888c8ef547f6b3" ])
+
+server = Server.new
+server.start
