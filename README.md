@@ -6,13 +6,13 @@ Install the gem
 
     $ gem install buildbox
 
-Then authenticate
+Add your worker tokens
 
-    $ buildbox auth:login [apikey]
+    $ buildbox worker:add [token]
 
 Then you can start monitoring for builds like so:
 
-    $ buildbox monitor:start --daemon
+    $ buildbox server:start
 
 For more help with the command line interface
 

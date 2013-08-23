@@ -10,7 +10,8 @@ options = {}
 
 help = <<HELP
 
-  worker   #  manager and start workers (add, start)
+  worker   #  add a worker (add)
+  server   #  start the buildbox build server (start)
   version  #  display version
 
 HELP
@@ -22,11 +23,11 @@ global = OptionParser.new do |opts|
   opts.separator help
 end
 
-commands['worker:start'] = OptionParser.new do |opts|
-  opts.banner = "Usage: buildbox worker:start"
+commands['server:start'] = OptionParser.new do |opts|
+  opts.banner = "Usage: buildbox server:start"
 
   opts.on("--help", "You're looking at it.") do
-    puts commands['worker:start']
+    puts commands['server:start']
     exit
   end
 end
@@ -52,7 +53,7 @@ if command = args.shift
     exit
   end
 
-  if command == "worker:start"
+  if command == "server:start"
     Buildbox::Server.new.start
   elsif command == "add"
     # Buildbox.config.update(:worker_access_tokens=> [ "5f6e1a888c8ef547f6b3" ])
