@@ -9,6 +9,7 @@ require "buildbox/monitor"
 require "buildbox/script"
 require "buildbox/server"
 require "buildbox/utf8"
+require "buildbox/version"
 
 require 'pathname'
 
