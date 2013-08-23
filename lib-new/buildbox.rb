@@ -110,26 +110,6 @@ module API
       connection.get(path).body
     end
   end
-
-  require 'celluloid/autostart'
-
-  class Observer
-    include Celluloid
-    include Celluloid::Notifications
-
-    def initialize(api)
-      @api = api
-    end
-
-    def setup
-      %w(start tick finish).each { |event| subscribe(event, :update) }
-    end
-
-    def update(event, build)
-      p event
-      @api.update_build(build)
-    end
-  end
 end
 
 class Environment
@@ -158,11 +138,18 @@ class Script
   end
 
   def save
-    File.open(path, 'w+') { |file| file.write(@build.script) }
+    File.open(path, 'w+') { |file| file.write(normalized_script) }
   end
 
   def delete
     File.delete(path)
+  end
+
+  private
+
+  def normalized_script
+    # normalize the line endings
+    @build.script.gsub(/\r\n?/, "\n")
   end
 end
 
@@ -170,7 +157,7 @@ require 'celluloid'
 
 class Builder
   include Celluloid
-  include Celluloid::Notifications
+  include Celluloid::Logger
 
   attr_reader :build, :output
 
@@ -179,21 +166,22 @@ class Builder
   end
 
   def start
-    publish('start', build)
+    info "Starting to build #{script.path} starting..."
+
     script.save
 
     build.output = `#{command}`
     build.exit_status = $?.to_i
-    publish('tick', build)
 
     script.delete
-    publish('finish', build)
+
+    info "#{script.path} finished"
   end
 
   private
 
   def command
-    %{#{environment} sh #{script.path}}
+    %{chmod +x #{script.path} && #{environment} exec #{script.path}}
   end
 
   def script
@@ -205,23 +193,51 @@ class Builder
   end
 end
 
+class Monitor
+  include Celluloid
+
+  def initialize(build, api)
+    @build = build
+    @api   = api
+  end
+
+  def monitor
+    loop do
+      @api.update_build(@build) if build_started?
+
+      if build_finished?
+        break
+      else
+        sleep 1
+      end
+    end
+  end
+
+  private
+
+  def build_started?
+    @build.output != nil
+  end
+
+  def build_finished?
+    @build.exit_status != nil
+  end
+end
+
 class Server
-  INTERVAL = 5
-
   def start
-    observer.setup
-
     loop do
       access_tokens.each do |access_token|
         api.worker(:access_token => access_token, :hostname => `hostname`.chomp).projects.each do |project|
           running_builds = api.scheduled_builds(project).map do |build|
+            Monitor.new(build, api).async.monitor
             Builder.new(build).future(:start)
           end
 
           # wait for all the running builds to finish
           running_builds.map(&:value)
 
-          sleep INTERVAL
+          sleep 5
         end
       end
     end
@@ -231,10 +247,6 @@ class Server
 
   def api
     @api ||= API::Client.new
-  end
-
-  def observer
-    @observer ||= API::Observer.new(api)
   end
 
   def access_tokens
