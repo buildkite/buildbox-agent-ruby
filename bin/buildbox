@@ -10,9 +10,7 @@ options = {}
 
 help = <<HELP
 
-  auth     #  authentication (login, logout)
-  monitor  #  monitor builds (start, stop)
-  build    #  run a build in the console (manual, retry)
+  worker   #  manager and start workers (add, start)
   version  #  display version
 
 HELP
@@ -24,37 +22,13 @@ global = OptionParser.new do |opts|
   opts.separator help
 end
 
-commands['auth:login'] = OptionParser.new do |opts|
-  opts.banner = "Usage: buildbox auth:login API_KEY"
-end
-
-commands['auth:logout'] = OptionParser.new do |opts|
-  opts.banner = "Usage: buildbox auth:logout"
-end
-
 commands['monitor:start'] = OptionParser.new do |opts|
   opts.banner = "Usage: buildbox monitor:start"
-
-  opts.on("-d", "--daemon", "Runs as a daemon") do
-    options[:daemon] = true
-  end
 
   opts.on("--help", "You're looking at it.") do
     puts commands['monitor:start']
     exit
   end
-end
-
-commands['monitor:stop'] = OptionParser.new do |opts|
-  opts.banner = "Usage: buildbox monitor:stop"
-end
-
-commands['build:manual'] = OptionParser.new do |opts|
-  opts.banner = "Usage: buildbox build:manual git@github.com:your/repo.git master"
-end
-
-commands['build:retry'] = OptionParser.new do |opts|
-  opts.banner = "Usage: buildbox build:retry 123"
 end
 
 commands['version'] = OptionParser.new do |opts|
@@ -79,43 +53,11 @@ if command = args.shift
   end
 
   if command =~ /^monitor/
-    client = Buildbox::Client.new(options)
-    if command == "monitor:start"
-      client.start
-    elsif command == "monitor:stop"
-      client.stop
-    end
-  end
-
-  if command =~ /^auth/
-    auth = Buildbox::Auth.new
-
-    if command == "auth:login"
-      api_key = args[0]
-
-      unless api_key
-        puts commands['auth:login']
-        exit
-      end
-
-      auth.login(:api_key => args[0])
-    elsif command == "auth:logout"
-      auth.logout
-    end
-  end
-
-  if command =~ /^build/
-    api = Buildbox::API.new(:api_key => Buildbox.configuration.api_key)
-
-    if command == "build:manual"
-      build = Buildbox::Build.new(:uuid => SecureRandom.uuid, :repository => args[0], :commit => args[1], :config => { :script => ["rspec"] })
-
-      Buildbox::Build::Runner.run(build, Buildbox::Build::ConsoleObserver.new)
-    elsif command == "build:retry"
-      data  = api.get_build_info(args[0])
-      build = Buildbox::Build.new(data.payload)
-
-      Buildbox::Build::Runner.run(build, Buildbox::Build::ConsoleObserver.new)
+    if command == "start"
+      server = Server.new
+      server.start
+    elsif command == "add"
+      # Buildbox.config.update(:worker_access_tokens=> [ "5f6e1a888c8ef547f6b3" ])
     end
   end
 else
