@@ -3,6 +3,7 @@ require 'rubygems'
 require "buildbox/api"
 require "buildbox/builder"
 require "buildbox/command"
+require "buildbox/cli"
 require "buildbox/configuration"
 require "buildbox/environment"
 require "buildbox/monitor"
