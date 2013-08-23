@@ -1,23 +1,21 @@
-require 'rubygems'
-
-require "buildbox/api"
-require "buildbox/builder"
-require "buildbox/command"
-require "buildbox/cli"
-require "buildbox/configuration"
-require "buildbox/environment"
-require "buildbox/monitor"
-require "buildbox/script"
-require "buildbox/server"
-require "buildbox/utf8"
-require "buildbox/version"
-
 require 'pathname'
 
 module Buildbox
+  autoload :API,           "buildbox/api"
+  autoload :Builder,       "buildbox/builder"
+  autoload :Command,       "buildbox/command"
+  autoload :CLI,           "buildbox/cli"
+  autoload :Configuration, "buildbox/configuration"
+  autoload :Environment,   "buildbox/environment"
+  autoload :Monitor,       "buildbox/monitor"
+  autoload :Script,        "buildbox/script"
+  autoload :Server,        "buildbox/server"
+  autoload :UTF8,          "buildbox/utf8"
+  autoload :VERSION,       "buildbox/version"
+
   def self.config
     @config ||= Configuration.new.tap(&:reload)
-  end
+ end
 
   def self.root_path
     path = Pathname.new File.join(ENV['HOME'], ".buildbox")

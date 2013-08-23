@@ -21,7 +21,7 @@ module Buildbox
     private
 
     def api
-      @api ||= Api.new
+      @api ||= API.new
     end
 
     def access_tokens

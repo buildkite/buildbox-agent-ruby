@@ -1,9 +1,10 @@
+require 'rubygems'
 require 'faraday'
 require 'faraday_middleware'
 require 'hashie/mash'
 
 module Buildbox
-  class Api
+  class API
     def initialize(config = Buildbox.config)
       @config = config
     end
