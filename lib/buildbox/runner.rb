@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'celluloid'
-require 'tempfile'
 require 'fileutils'
 
 module Buildbox
@@ -29,6 +28,8 @@ module Buildbox
       build.output      = result.output
       build.exit_status = result.exit_status
 
+      File.delete(script_path)
+
       info "#{namespace}/#{@build.number} finished"
     end
 
@@ -45,7 +46,7 @@ module Buildbox
     end
 
     def script_path
-      @script_path ||= Tempfile.new("buildbox-#{namespace.gsub(/\//, '-')}-#{@build.number}").path
+      @script_path ||= Buildbox.root_path.join("buildbox-#{namespace.gsub(/\//, '-')}-#{@build.number}")
     end
 
     def namespace
