@@ -2,13 +2,16 @@ require 'pty'
 
 module Buildbox
   class Command
+    class Result < Struct.new(:output, :exit_status)
+    end
+
     def self.run(command, options = {}, &block)
       new(command, options).run(&block)
     end
 
     def initialize(command, options = {})
       @command       = command
-      @path          = options[:path] || "."
+      @directory     = options[:directory] || "."
       @read_interval = options[:read_interval] || 5
     end
 
@@ -17,7 +20,7 @@ module Buildbox
       read_io, write_io, pid = nil
 
       # spawn the process in a pseudo terminal so colors out outputted
-      read_io, write_io, pid = PTY.spawn("cd #{expanded_path} && #{@command}")
+      read_io, write_io, pid = PTY.spawn("cd #{expanded_directory} && #{@command}")
 
       # we don't need to write to the spawned io
       write_io.close
@@ -48,13 +51,13 @@ module Buildbox
       Process.waitpid(pid)
 
       # the final result!
-      [ output.chomp, $?.exitstatus ]
+      Result.new(output.chomp, $?.exitstatus)
     end
 
     private
 
-    def expanded_path
-      File.expand_path(@path)
+    def expanded_directory
+      File.expand_path(@directory)
     end
 
     def read_interval

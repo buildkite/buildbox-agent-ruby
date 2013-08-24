@@ -14,7 +14,7 @@ module Buildbox
     end
 
     def scheduled_builds(project)
-      get(project.scheduled_builds_url)
+      get(project.scheduled_builds_url).map { |build| Buildbox::Build.new(build) }
     end
 
     def update_build(build)

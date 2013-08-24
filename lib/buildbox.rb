@@ -2,6 +2,7 @@ require 'pathname'
 
 module Buildbox
   autoload :API,           "buildbox/api"
+  autoload :Build,         "buildbox/build"
   autoload :Builder,       "buildbox/builder"
   autoload :Command,       "buildbox/command"
   autoload :CLI,           "buildbox/cli"
