@@ -18,6 +18,15 @@ module Buildbox
         end
       end
 
+      @commands['worker:setup'] = OptionParser.new do |opts|
+        opts.banner = "Usage: buildbox worker:setup [token]"
+
+        opts.on("--help", "You're looking at it.") do
+          puts @commands['worker:setup']
+          exit
+        end
+      end
+
       @commands['version'] = OptionParser.new do |opts|
         opts.banner = "Usage: buildbox version"
       end
@@ -25,6 +34,8 @@ module Buildbox
 
     def parse
       global.order!
+
+      command = @argv.shift
 
       if command
         if @commands.has_key?(command)
@@ -40,9 +51,18 @@ module Buildbox
         end
 
         if command == "worker:start"
-          Buildbox::Worker.new.start
+          Buildbox::Worker.new(Buildbox.config.worker_access_token).start
         elsif command == "worker:setup"
-          # Buildbox.config.update(:worker_access_tokens=> [ "5f6e1a888c8ef547f6b3" ])
+          if @argv.length == 0
+            puts "No token provided"
+            exit 1
+          end
+
+          access_token = @argv.first
+          Buildbox.config.update(:worker_access_token => access_token)
+
+          puts "Successfully added worker access token"
+          puts "You can now start the worker with `buildbox worker:start`"
         end
       else
         puts global.help
@@ -50,10 +70,6 @@ module Buildbox
     end
 
     private
-
-    def command
-      @command ||= @argv.shift
-    end
 
     def global
       @global ||= OptionParser.new do |opts|

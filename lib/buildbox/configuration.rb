@@ -4,8 +4,8 @@ require 'json'
 
 module Buildbox
   class Configuration < Hashie::Dash
-    property :worker_access_tokens, :default => []
-    property :api_endpoint,         :default => "http://api.buildbox.dev/v1"
+    property :worker_access_token, :default => nil
+    property :api_endpoint,        :default => "http://api.buildbox.dev/v1"
 
     def update(attributes)
       attributes.each_pair { |key, value| self[key] = value }
