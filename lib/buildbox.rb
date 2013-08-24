@@ -3,12 +3,12 @@ require 'pathname'
 module Buildbox
   autoload :API,           "buildbox/api"
   autoload :Build,         "buildbox/build"
-  autoload :Builder,       "buildbox/builder"
   autoload :Command,       "buildbox/command"
   autoload :CLI,           "buildbox/cli"
   autoload :Configuration, "buildbox/configuration"
   autoload :Environment,   "buildbox/environment"
   autoload :Monitor,       "buildbox/monitor"
+  autoload :Runner,        "buildbox/runner"
   autoload :Script,        "buildbox/script"
   autoload :Server,        "buildbox/server"
   autoload :UTF8,          "buildbox/utf8"

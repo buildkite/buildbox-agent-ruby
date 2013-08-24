@@ -4,7 +4,7 @@ require 'tempfile'
 require 'fileutils'
 
 module Buildbox
-  class Builder
+  class Runner
     include Celluloid
     include Celluloid::Logger
 
@@ -33,7 +33,7 @@ module Buildbox
     private
 
     def command
-      %{echo #{@build.script.inspect} > #{script_path} && chmod +x #{script_path} && #{environment} exec #{script_path}}
+      %{echo #{@build.script.inspect} > #{script_path}; chmod +x #{script_path}; #{environment} exec #{script_path}}
     end
 
     def directory_path

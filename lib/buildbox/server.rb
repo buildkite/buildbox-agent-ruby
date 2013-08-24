@@ -6,7 +6,7 @@ module Buildbox
           api.worker(:access_token => access_token, :hostname => `hostname`.chomp).projects.each do |project|
             running_builds = api.scheduled_builds(project).map do |build|
               Monitor.new(build, api).async.monitor
-              Builder.new(build).future(:start)
+              Runner.new(build).future(:start)
             end
 
             # wait for all the running builds to finish
