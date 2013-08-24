@@ -5,7 +5,8 @@ require 'spec_helper'
 describe 'running a build' do
   let(:commit)    { "3e0c65433b241ff2c59220f80bcdcd2ebb7e4b96" }
   let(:command)   { "rspec test_spec.rb" }
-  let(:build)     { Buildbox::Build.new(:project => { :name => "test", :team => { :name => "test" } }, :number => 1, :script => script) }
+  let(:env)       { { } }
+  let(:build)     { Buildbox::Build.new(:project => { :name => "test", :team => { :name => "test" } }, :number => 1, :script => script, :env => env) }
   let(:runner)    { Buildbox::Runner.new(build) }
   let(:script) do
 <<-SCRIPT
@@ -74,7 +75,6 @@ SCRIPT
     end
   end
 
-
   context 'running a ruby script' do
     let(:script) do
       <<-SCRIPT
@@ -89,6 +89,37 @@ SCRIPT
 
       build.output.should == 'hello'
       build.exit_status.should == 123
+    end
+  end
+
+  context 'accessing ENV variables with a ruby script' do
+    let(:env) { { "FOO" => "great" } }
+    let(:script) do
+      <<-SCRIPT
+#!/usr/bin/env ruby
+puts ENV["FOO"]
+SCRIPT
+    end
+
+    it "runs and returns the correct output" do
+      runner.start
+
+      build.output.should == 'great'
+    end
+  end
+
+  context 'accessing ENV variables with a bash script' do
+    let(:env) { { "BAR" => "great" } }
+    let(:script) do
+      <<-SCRIPT
+echo $BAR
+SCRIPT
+    end
+
+    it "runs and returns the correct output" do
+      runner.start
+
+      build.output.should == 'great'
     end
   end
 

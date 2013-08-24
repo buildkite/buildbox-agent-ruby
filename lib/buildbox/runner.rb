@@ -16,8 +16,10 @@ module Buildbox
 
     def start
       info "Starting to build #{namespace}/#{@build.number} starting..."
+      info "Running command: #{command}"
 
       FileUtils.mkdir_p(directory_path)
+      File.open(script_path, 'w+') { |file| file.write(@build.script) }
 
       build.output = ""
       result = Command.run(command, :directory => directory_path) do |chunk|
@@ -33,7 +35,9 @@ module Buildbox
     private
 
     def command
-      %{echo #{@build.script.inspect} > #{script_path}; chmod +x #{script_path}; #{environment} exec #{script_path}}
+      export = environment.any? ? "export #{environment};" : ""
+
+      "#{export} chmod +x #{script_path} && #{script_path}"
     end
 
     def directory_path
