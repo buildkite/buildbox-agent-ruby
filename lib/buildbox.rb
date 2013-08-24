@@ -10,8 +10,8 @@ module Buildbox
   autoload :Monitor,       "buildbox/monitor"
   autoload :Runner,        "buildbox/runner"
   autoload :Script,        "buildbox/script"
-  autoload :Server,        "buildbox/server"
   autoload :UTF8,          "buildbox/utf8"
+  autoload :Worker,        "buildbox/worker"
   autoload :VERSION,       "buildbox/version"
 
   def self.config

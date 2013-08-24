@@ -1,5 +1,5 @@
 module Buildbox
-  class Server
+  class Worker
     def start
       loop do
         access_tokens.each do |access_token|

@@ -9,11 +9,11 @@ module Buildbox
       @commands = {}
       @options  = {}
 
-      @commands['server:start'] = OptionParser.new do |opts|
-        opts.banner = "Usage: buildbox server:start"
+      @commands['worker:start'] = OptionParser.new do |opts|
+        opts.banner = "Usage: buildbox worker:start"
 
         opts.on("--help", "You're looking at it.") do
-          puts @commands['server:start']
+          puts @commands['worker:start']
           exit
         end
       end
@@ -39,9 +39,9 @@ module Buildbox
           exit
         end
 
-        if command == "server:start"
-          Buildbox::Server.new.start
-        elsif command == "add"
+        if command == "worker:start"
+          Buildbox::Worker.new.start
+        elsif command == "worker:setup"
           # Buildbox.config.update(:worker_access_tokens=> [ "5f6e1a888c8ef547f6b3" ])
         end
       else
@@ -67,8 +67,7 @@ module Buildbox
     def help
 <<HELP
 
-  worker   #  add a worker (add)
-  server   #  start the buildbox build server (start)
+  worker   #  worker management (setup, server)
   version  #  display version
 
 HELP
