@@ -1,4 +1,5 @@
 require 'pathname'
+require 'logger'
 
 module Buildbox
   autoload :API,           "buildbox/api"
@@ -17,7 +18,11 @@ module Buildbox
 
   def self.config
     @config ||= Configuration.new.tap(&:reload)
- end
+  end
+
+  def self.logger
+    @logger ||= Logger.new(STDOUT).tap { |logger| logger.level = Logger::INFO }
+  end
 
   def self.root_path
     path = Pathname.new File.join(ENV['HOME'], ".buildbox")

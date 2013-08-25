@@ -17,7 +17,8 @@ module Buildbox
         if @build.finished?
           break
         else
-          sleep 1
+          # 3 seconds seems reasonable
+          sleep 3
         end
       end
     end

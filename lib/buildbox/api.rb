@@ -27,7 +27,7 @@ module Buildbox
       @connection ||= Faraday.new(:url => @config.api_endpoint) do |faraday|
         faraday.request  :json
 
-        faraday.response :logger
+        faraday.response :logger, Buildbox.logger
         faraday.response :mashify
 
         # json needs to come after mashify as it needs to run before the mashify
