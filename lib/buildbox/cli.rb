@@ -51,7 +51,7 @@ module Buildbox
         end
 
         if command == "worker:start"
-          Buildbox::Worker.new(Buildbox.config.worker_access_token).start
+          Buildbox::Worker.new(Buildbox.config.worker_access_tokens).start
         elsif command == "worker:setup"
           if @argv.length == 0
             puts "No token provided"
@@ -59,7 +59,8 @@ module Buildbox
           end
 
           access_token = @argv.first
-          Buildbox.config.update(:worker_access_token => access_token)
+          worker_access_tokens = Buildbox.config.worker_access_tokens
+          Buildbox.config.update(:worker_access_tokens => worker_access_tokens << access_token)
 
           puts "Successfully added worker access token"
           puts "You can now start the worker with `buildbox worker:start`"

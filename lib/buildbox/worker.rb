@@ -1,7 +1,7 @@
 module Buildbox
   class Worker
-    def initialize(access_token)
-      @access_token = access_token
+    def initialize(access_tokens)
+      @access_tokens = access_tokens
     end
 
     def start
@@ -27,7 +27,9 @@ module Buildbox
     end
 
     def projects
-      api.worker(:access_token => @access_token, :hostname => hostname).projects
+      @access_tokens.map do |access_token|
+        api.worker(:access_token => access_token, :hostname => hostname).projects
+      end.flatten
     end
 
     def hostname
