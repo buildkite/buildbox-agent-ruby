@@ -30,7 +30,7 @@ module Buildbox
 
       File.delete(script_path)
 
-      info "#{namespace}/#{@build.number} finished with exit status #{result.exit_status}"
+      info "#{namespace} ##{@build.number} finished with exit status #{result.exit_status}"
     end
 
     private

@@ -1,7 +1,10 @@
 module Buildbox
   class Server
-    def initialize(config = Buildbox.config)
+    INTERVAL = 5
+
+    def initialize(config = Buildbox.config, logger = Buildbox.logger)
       @config = config
+      @logger = logger
     end
 
     def start
@@ -11,7 +14,9 @@ module Buildbox
         end
 
         @config.reload
-        sleep 5
+
+        @logger.info "Sleeping for #{INTERVAL} seconds"
+        sleep INTERVAL
       end
     end
 
