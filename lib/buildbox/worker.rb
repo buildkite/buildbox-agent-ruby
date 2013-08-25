@@ -24,7 +24,7 @@ module Buildbox
 
     def projects
       @api.worker(:access_token => @access_token, :hostname => hostname).projects
-    rescue Buildbox::API::Error
+    rescue Faraday::Error::ClientError
       warn "Worker #{@access_token} doesn't exist"
       [] # return empty array to avoid breakage
     end

@@ -5,8 +5,6 @@ require 'hashie/mash'
 
 module Buildbox
   class API
-    class Error < StandardError; end
-
     def initialize(config = Buildbox.config)
       @config = config
     end
@@ -35,26 +33,26 @@ module Buildbox
         # json needs to come after mashify as it needs to run before the mashify
         # middleware.
         faraday.response :json
+        faraday.response :raise_error
 
         faraday.adapter Faraday.default_adapter
       end
     end
 
     def post(path, body = {})
-      parse_response connection.post(path) { |request| request.body = body }
+      connection.post(path) do |request|
+        request.body = body
+      end.body
     end
 
     def put(path, body = {})
-      parse_response connection.put(path) { |request| request.body = body }
+      connection.put(path) do |request|
+        request.body = body
+      end.body
     end
 
     def get(path)
-      parse_response connection.get(path)
-    end
-
-    def parse_response(response)
-      body = response.body
-      raise Error.new(body.error) if body.error
+      connection.get(path).body
     end
   end
 end
