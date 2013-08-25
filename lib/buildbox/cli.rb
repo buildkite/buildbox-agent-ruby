@@ -51,7 +51,7 @@ module Buildbox
         end
 
         if command == "worker:start"
-          Buildbox::Worker.new(Buildbox.config.worker_access_tokens).start
+          Buildbox::Server.new.start
         elsif command == "worker:setup"
           if @argv.length == 0
             puts "No token provided"

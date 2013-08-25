@@ -5,6 +5,8 @@ require 'hashie/mash'
 
 module Buildbox
   class API
+    class Error < StandardError; end
+
     def initialize(config = Buildbox.config)
       @config = config
     end
@@ -39,19 +41,20 @@ module Buildbox
     end
 
     def post(path, body = {})
-      connection.post(path) do |request|
-        request.body = body
-      end.body
+      parse_response connection.post(path) { |request| request.body = body }
     end
 
     def put(path, body = {})
-      connection.put(path) do |request|
-        request.body = body
-      end.body
+      parse_response connection.put(path) { |request| request.body = body }
     end
 
     def get(path)
-      connection.get(path).body
+      parse_response connection.get(path)
+    end
+
+    def parse_response(response)
+      body = response.body
+      raise Error.new(body.error) if body.error
     end
   end
 end
