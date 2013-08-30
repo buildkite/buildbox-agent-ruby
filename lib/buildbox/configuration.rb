@@ -1,11 +1,22 @@
 require 'rubygems'
-require 'hashie/dash'
+require 'hashie/mash'
 require 'json'
 
 module Buildbox
-  class Configuration < Hashie::Dash
-    property :worker_access_tokens, :default => []
-    property :api_endpoint,         :default => "https://api.buildbox.io/v1"
+  class Configuration < Hashie::Mash
+    def worker_access_tokens
+      env_workers = ENV['BUILDBOX_WORKERS']
+
+      if env_workers.nil?
+        self[:worker_access_tokens] || []
+      else
+        env_workers.to_s.split(",")
+      end
+    end
+
+    def api_endpoint
+      ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://api.buildbox.io/v1"
+    end
 
     def update(attributes)
       attributes.each_pair { |key, value| self[key] = value }
