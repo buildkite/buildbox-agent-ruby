@@ -12,7 +12,7 @@ Add your worker tokens
 
 Then you can start monitoring for builds like so:
 
-    $ buildbox server:start
+    $ buildbox worker:start
 
 For more help with the command line interface
 
