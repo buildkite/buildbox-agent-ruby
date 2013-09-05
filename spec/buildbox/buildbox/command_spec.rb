@@ -4,6 +4,12 @@ require "spec_helper"
 
 describe Buildbox::Command do
   describe "#run" do
+    it "is run within a tty" do
+      result = Buildbox::Command.command(%{ruby -e "puts STDOUT.tty?"})
+
+      result.output.should == "true"
+    end
+
     it "successfully runs and returns the output from a simple comment" do
       result = Buildbox::Command.command('echo hello world')
 
