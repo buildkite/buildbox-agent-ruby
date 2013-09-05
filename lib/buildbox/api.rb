@@ -9,7 +9,7 @@ module Buildbox
       @config = config
     end
 
-    def worker(access_token: access_token, hostname: hostname)
+    def worker(access_token, hostname)
       put("workers/#{access_token}", :hostname => hostname)
     end
 
