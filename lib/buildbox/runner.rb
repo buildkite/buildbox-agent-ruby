@@ -15,16 +15,13 @@ module Buildbox
 
     def start
       info "Starting to build #{namespace}/#{@build.number} starting..."
+      info "Running command: #{command}"
 
       FileUtils.mkdir_p(directory_path)
       File.open(script_path, 'w+') { |file| file.write(@build.script) }
-      File.chmod(0777, script_path)
-
-      info "Running script: #{script_path}"
 
       build.output = ""
-      result = Command.script(script_path, :environment => @build.env,
-                                           :directory   => directory_path) do |chunk|
+      result = Command.run(command, :directory => directory_path) do |chunk|
         build.output << chunk
       end
 
@@ -38,6 +35,12 @@ module Buildbox
 
     private
 
+    def command
+      export = environment.any? ? "export #{environment};" : ""
+
+      "#{export} chmod +x #{script_path} && #{script_path}"
+    end
+
     def directory_path
       @directory_path ||= Buildbox.root_path.join(namespace)
     end
@@ -48,6 +51,10 @@ module Buildbox
 
     def namespace
       "#{@build.project.team.name}/#{@build.project.name}"
+    end
+
+    def environment
+      @environment ||= Environment.new(@build.env)
     end
   end
 end
