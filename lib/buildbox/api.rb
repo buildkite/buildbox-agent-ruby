@@ -6,7 +6,12 @@ require 'hashie/mash'
 module Buildbox
   class API
     def initialize(config = Buildbox.config)
-      @config = config
+      @config  = config
+    end
+
+    def authenticate(api_key)
+      @api_key = api_key
+      get("user")
     end
 
     def worker(access_token, hostname)
@@ -25,6 +30,8 @@ module Buildbox
 
     def connection
       @connection ||= Faraday.new(:url => @config.api_endpoint) do |faraday|
+        faraday.basic_auth @api_key || @config.api_key, ''
+
         faraday.request  :json
 
         faraday.response :logger, Buildbox.logger

@@ -9,6 +9,15 @@ module Buildbox
       @commands = {}
       @options  = {}
 
+      @commands['auth:login'] = OptionParser.new do |opts|
+        opts.banner = "Usage: buildbox auth:login"
+
+        opts.on("--help", "You're looking at it.") do
+          puts @commands['auth:login']
+          exit
+        end
+      end
+
       @commands['worker:start'] = OptionParser.new do |opts|
         opts.banner = "Usage: buildbox worker:start"
 
@@ -18,11 +27,11 @@ module Buildbox
         end
       end
 
-      @commands['worker:setup'] = OptionParser.new do |opts|
-        opts.banner = "Usage: buildbox worker:setup [token]"
+      @commands['worker:add'] = OptionParser.new do |opts|
+        opts.banner = "Usage: buildbox worker:add [token]"
 
         opts.on("--help", "You're looking at it.") do
-          puts @commands['worker:setup']
+          puts @commands['worker:add']
           exit
         end
       end
@@ -52,7 +61,7 @@ module Buildbox
 
         if command == "worker:start"
           Buildbox::Server.new.start
-        elsif command == "worker:setup"
+        elsif command == "worker:add"
           if @argv.length == 0
             puts "No token provided"
             exit 1
@@ -63,7 +72,25 @@ module Buildbox
           Buildbox.config.update(:worker_access_tokens => worker_access_tokens << access_token)
 
           puts "Successfully added worker access token"
-          puts "You can now start the worker with `buildbox worker:start`"
+          puts "You can now start the worker with: buildbox worker:start"
+        elsif command == "auth:login"
+          if @argv.length == 0
+            puts "No api key provided"
+            exit 1
+          end
+
+          api_key = @argv.first
+
+          begin
+            Buildbox::API.new.authenticate(api_key)
+            Buildbox.config.update(:api_key => api_key)
+
+            puts "Successfully added your api_key"
+            puts "You can now add workers with: buildbox worker:add [worker_token]"
+          rescue
+            puts "Could not authenticate your api_key"
+            exit 1
+          end
         end
       else
         puts global.help

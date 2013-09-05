@@ -9,11 +9,12 @@ module Buildbox
 
     def start
       loop do
+        @config.check
+        @config.reload
+
         worker_access_tokens.each do |access_token|
           Buildbox::Worker.new(access_token, api).work
         end
-
-        @config.reload
 
         @logger.info "Sleeping for #{INTERVAL} seconds"
         sleep INTERVAL
