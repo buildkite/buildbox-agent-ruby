@@ -4,13 +4,13 @@ require 'json'
 
 module Buildbox
   class Configuration < Hashie::Mash
-    def worker_access_tokens
-      env_workers = ENV['BUILDBOX_WORKERS']
+    def agent_access_tokens
+      env_agents = ENV['BUILDBOX_WORKERS']
 
-      if env_workers.nil?
-        self[:worker_access_tokens] || []
+      if env_agents.nil?
+        self[:agent_access_tokens] || []
       else
-        env_workers.to_s.split(",")
+        env_agents.to_s.split(",")
       end
     end
 

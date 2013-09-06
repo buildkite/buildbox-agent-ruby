@@ -14,8 +14,8 @@ module Buildbox
       get("user")
     end
 
-    def worker(access_token, hostname)
-      put("workers/#{access_token}", :hostname => hostname)
+    def agent(access_token, hostname)
+      put("agents/#{access_token}", :hostname => hostname)
     end
 
     def scheduled_builds(project)

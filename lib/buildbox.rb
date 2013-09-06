@@ -13,7 +13,7 @@ module Buildbox
   autoload :Script,        "buildbox/script"
   autoload :Server,        "buildbox/server"
   autoload :UTF8,          "buildbox/utf8"
-  autoload :Worker,        "buildbox/worker"
+  autoload :Agent,         "buildbox/agent"
   autoload :VERSION,       "buildbox/version"
 
   def self.config

@@ -18,20 +18,20 @@ module Buildbox
         end
       end
 
-      @commands['worker:start'] = OptionParser.new do |opts|
-        opts.banner = "Usage: buildbox worker:start"
+      @commands['agent:start'] = OptionParser.new do |opts|
+        opts.banner = "Usage: buildbox agent:start"
 
         opts.on("--help", "You're looking at it.") do
-          puts @commands['worker:start']
+          puts @commands['agent:start']
           exit
         end
       end
 
-      @commands['worker:add'] = OptionParser.new do |opts|
-        opts.banner = "Usage: buildbox worker:add [token]"
+      @commands['agent:setup'] = OptionParser.new do |opts|
+        opts.banner = "Usage: buildbox setup:add [token]"
 
         opts.on("--help", "You're looking at it.") do
-          puts @commands['worker:add']
+          puts @commands['setup:add']
           exit
         end
       end
@@ -59,20 +59,20 @@ module Buildbox
           exit
         end
 
-        if command == "worker:start"
+        if command == "agent:start"
           Buildbox::Server.new.start
-        elsif command == "worker:add"
+        elsif command == "setup:add"
           if @argv.length == 0
             puts "No token provided"
             exit 1
           end
 
           access_token = @argv.first
-          worker_access_tokens = Buildbox.config.worker_access_tokens
-          Buildbox.config.update(:worker_access_tokens => worker_access_tokens << access_token)
+          agent_access_tokens = Buildbox.config.agent_access_tokens
+          Buildbox.config.update(:agent_access_tokens => agent_access_tokens << access_token)
 
-          puts "Successfully added worker access token"
-          puts "You can now start the worker with: buildbox worker:start"
+          puts "Successfully added agent access token"
+          puts "You can now start the agent with: buildbox agent:start"
         elsif command == "auth:login"
           if @argv.length == 0
             puts "No api key provided"
@@ -86,7 +86,7 @@ module Buildbox
             Buildbox.config.update(:api_key => api_key)
 
             puts "Successfully added your api_key"
-            puts "You can now add workers with: buildbox worker:add [worker_token]"
+            puts "You can now add agents with: buildbox setup:add [agent_token]"
           rescue
             puts "Could not authenticate your api_key"
             exit 1
@@ -111,7 +111,7 @@ module Buildbox
     def help
 <<HELP
 
-  worker   #  worker management (setup, server)
+  agent   #  agent management (setup, server)
   version  #  display version
 
 HELP

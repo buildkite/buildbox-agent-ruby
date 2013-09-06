@@ -2,7 +2,7 @@ require 'rubygems'
 require 'celluloid'
 
 module Buildbox
-  class Worker
+  class Agent
     include Celluloid::Logger
 
     def initialize(access_token, api)
@@ -23,9 +23,9 @@ module Buildbox
     private
 
     def projects
-      @api.worker(@access_token, hostname).projects
+      @api.agent(@access_token, hostname).projects
     rescue Faraday::Error::ClientError
-      warn "Worker #{@access_token} doesn't exist"
+      warn "Agent #{@access_token} doesn't exist"
       [] # return empty array to avoid breakage
     end
 
