@@ -5,7 +5,7 @@ require 'json'
 module Buildbox
   class Configuration < Hashie::Mash
     def agent_access_tokens
-      env_agents = ENV['BUILDBOX_WORKERS']
+      env_agents = ENV['BUILDBOX_AGENTS']
 
       if env_agents.nil?
         self[:agent_access_tokens] || []
