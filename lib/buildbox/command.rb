@@ -1,67 +1,65 @@
-require 'pty'
+require 'childprocess'
 
 module Buildbox
   class Command
     class Result < Struct.new(:output, :exit_status)
     end
 
-    def self.run(command, options = {}, &block)
-      new(command, options).run(&block)
+    def self.command(command, options = {}, &block)
+      arguments = [ "bash", "-c", command ]
+
+      new(arguments, options).start(&block)
     end
 
-    def initialize(command, options = {})
-      @command       = command
+    def self.script(script, options = {}, &block)
+      new(script, options).start(&block)
+    end
+
+    def initialize(arguments, options = {})
+      @arguments     = arguments
+      @environment   = options[:environment] || {}
       @directory     = options[:directory] || "."
-      @read_interval = options[:read_interval] || 5
     end
 
-    def run(&block)
-      output = ""
-      read_io, write_io, pid = nil
+    def start(&block)
+      r, w = IO.pipe
+      fd = IO.sysopen("/dev/tty", "w")
+      a = IO.new(fd, "w")
 
-      # spawn the process in a pseudo terminal so colors out outputted
-      read_io, write_io, pid = PTY.spawn("cd #{expanded_directory} && #{@command}")
+      arguments         = [ *@arguments ].map(&:to_s) # all arguments must be a string
+      process           = ChildProcess.build(*arguments)
+      process.cwd       = expanded_directory
+      process.io.stdout = process.io.stderr = w
 
-      # we don't need to write to the spawned io
-      write_io.close
-
-      loop do
-        fds, = IO.select([read_io], nil, nil, read_interval)
-        if fds
-          # should have some data to read
-          begin
-            chunk         = read_io.read_nonblock(10240)
-            cleaned_chunk = UTF8.clean(chunk)
-
-            output << chunk
-            yield cleaned_chunk if block_given?
-          rescue Errno::EAGAIN, Errno::EWOULDBLOCK
-            # do select again
-          rescue EOFError, Errno::EIO # EOFError from OSX, EIO is raised by ubuntu
-            break
-          end
-        end
-        # if fds are empty, timeout expired - run another iteration
+      @environment.each_pair do |key, value|
+        process.environment[key] = value
       end
 
-      # we're done reading, yay!
-      read_io.close
+      process.start
+      w.close
 
-      # just wait until its finally finished closing
-      Process.waitpid(pid)
+      output = ""
+      begin
+        loop do
+          chunk         = r.readpartial(10240)
+          cleaned_chunk = UTF8.clean(chunk)
+
+          output << chunk
+          yield cleaned_chunk if block_given?
+        end
+      rescue EOFError
+      end
+
+      process.wait
 
       # the final result!
-      Result.new(output.chomp, $?.exitstatus)
+      Result.new(output.chomp, process.exit_code)
     end
 
     private
 
     def expanded_directory
       File.expand_path(@directory)
-    end
-
-    def read_interval
-      @read_interval
     end
   end
 end
