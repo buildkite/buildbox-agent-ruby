@@ -1,4 +1,5 @@
 require 'childprocess'
+require 'pty'
 
 module Buildbox
   class Command
@@ -6,9 +7,7 @@ module Buildbox
     end
 
     def self.command(command, options = {}, &block)
-      arguments = [ "bash", "-c", command ]
-
-      new(arguments, options).start(&block)
+      new(command, options).start(&block)
     end
 
     def self.script(script, options = {}, &block)
@@ -22,26 +21,24 @@ module Buildbox
     end
 
     def start(&block)
-      r, w = IO.pipe
-      fd = IO.sysopen("/dev/tty", "w")
-      a = IO.new(fd, "w")
+      read_io, write_io = IO.pipe
 
-      arguments         = [ *@arguments ].map(&:to_s) # all arguments must be a string
+      arguments         = [ *runner, *@arguments ].compact.map(&:to_s) # all arguments must be a string
       process           = ChildProcess.build(*arguments)
       process.cwd       = expanded_directory
-      process.io.stdout = process.io.stderr = w
+      process.io.stdout = process.io.stderr = write_io
 
       @environment.each_pair do |key, value|
         process.environment[key] = value
       end
 
       process.start
-      w.close
+      write_io.close
 
       output = ""
       begin
         loop do
-          chunk         = r.readpartial(10240)
+          chunk         = read_io.readpartial(10240)
           cleaned_chunk = UTF8.clean(chunk)
 
           output << chunk
@@ -57,6 +54,18 @@ module Buildbox
     end
 
     private
+
+    # on heroku, tty isn't avaiable. so we result to just running command through
+    # bash. the downside to this, is that stuff colors aren't outputted because
+    # processes don't think they're being in a terminal.
+    def runner
+      require 'pty'
+      PTY.spawn('whoami')
+
+      [ File.join(Buildbox.gem_root, "bin", "buildbox-pty") ]
+    rescue
+      [ "bash", "-c" ]
+    end
 
     def expanded_directory
       File.expand_path(@directory)

@@ -7,7 +7,6 @@ module Buildbox
   autoload :Command,       "buildbox/command"
   autoload :CLI,           "buildbox/cli"
   autoload :Configuration, "buildbox/configuration"
-  autoload :Environment,   "buildbox/environment"
   autoload :Monitor,       "buildbox/monitor"
   autoload :Runner,        "buildbox/runner"
   autoload :Script,        "buildbox/script"
@@ -22,6 +21,10 @@ module Buildbox
 
   def self.logger
     @logger ||= Logger.new(STDOUT).tap { |logger| logger.level = Logger::INFO }
+  end
+
+  def self.gem_root
+    path = File.expand_path(File.join(__FILE__, "..", ".."))
   end
 
   def self.root_path

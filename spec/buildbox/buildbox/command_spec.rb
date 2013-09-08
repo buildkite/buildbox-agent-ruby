@@ -5,7 +5,7 @@ require "spec_helper"
 describe Buildbox::Command do
   describe "#run" do
     it "is run within a tty" do
-      result = Buildbox::Command.run(%{ruby -e "puts STDOUT.tty?"})
+      result = Buildbox::Command.command(%{ruby -e "puts STDOUT.tty?"})
 
       result.output.should == "true"
     end
@@ -53,31 +53,7 @@ describe Buildbox::Command do
 
       result.exit_status.should == 0
       result.output.should == "hello world"
-      chunked_output.should == "hello world\n"
-    end
-
-    it "can collect chunks from within a thread" do
-      chunked_output = ''
-      result = nil
-      worker_thread = Thread.new do
-        result = Buildbox::Command.command('echo before sleep; sleep 1; echo after sleep') do |chunk|
-          unless chunk.nil?
-            chunked_output += chunk
-          end
-        end
-      end
-
-      worker_thread.run
-      sleep(0.5)
-      result.should be_nil
-      chunked_output.should == "before sleep\n"
-
-      worker_thread.join
-
-      result.should_not be_nil
-      result.exit_status.should == 0
-      result.output.should == "before sleep\nafter sleep"
-      chunked_output.should == "before sleep\nafter sleep\n"
+      chunked_output.should == "hello world\r\n"
     end
 
     it 'returns a result when running an invalid command in a thread' do
@@ -98,15 +74,33 @@ describe Buildbox::Command do
       second_result.output.should =~ /doesntexist.rb:.+not found/
     end
 
-    it "captures color'd output" do
+    it "captures color'd output from a command" do
       chunked_output = ''
-      result = Buildbox::Command.command("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')} --color") do |chunk|
+      result = Buildbox::Command.command("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')}") do |chunk|
         chunked_output += chunk unless chunk.nil?
       end
 
       result.exit_status.should == 0
       result.output.should include("32m")
       chunked_output.should include("32m")
+    end
+
+    it "runs scripts in a tty" do
+      chunked_output = ''
+      result = Buildbox::Command.script(FIXTURES_PATH.join('tty_script')) do |chunk|
+        chunked_output += chunk unless chunk.nil?
+      end
+
+      result.output.should == "true"
+      result.exit_status.should == 123
+    end
+
+    it "still runs even if pty isn't available" do
+      PTY.should_receive(:spawn).and_raise(RuntimeError.new)
+      result = Buildbox::Command.command('echo hello world')
+
+      result.exit_status.should == 0
+      result.output.should == "hello world"
     end
 
     it "supports utf8 characters" do
