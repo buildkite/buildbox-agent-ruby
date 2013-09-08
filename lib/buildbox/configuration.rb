@@ -24,7 +24,7 @@ module Buildbox
 
     def check
       unless api_key
-        puts "No api_key set. You can set it with\nbuildbox authenticate [api_key]"
+        puts "No api_key set. You can set it with\nbuildbox auth:login [api_key]"
         exit 1
       end
     end

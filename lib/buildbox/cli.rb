@@ -28,10 +28,10 @@ module Buildbox
       end
 
       @commands['agent:setup'] = OptionParser.new do |opts|
-        opts.banner = "Usage: buildbox setup:add [token]"
+        opts.banner = "Usage: buildbox agent:setup [token]"
 
         opts.on("--help", "You're looking at it.") do
-          puts @commands['setup:add']
+          puts @commands['agent:setup']
           exit
         end
       end
@@ -61,7 +61,7 @@ module Buildbox
 
         if command == "agent:start"
           Buildbox::Server.new.start
-        elsif command == "setup:add"
+        elsif command == "agent:setup"
           if @argv.length == 0
             puts "No token provided"
             exit 1
@@ -86,7 +86,7 @@ module Buildbox
             Buildbox.config.update(:api_key => api_key)
 
             puts "Successfully added your api_key"
-            puts "You can now add agents with: buildbox setup:add [agent_token]"
+            puts "You can now add agents with: buildbox agent:setup [agent_token]"
           rescue
             puts "Could not authenticate your api_key"
             exit 1
