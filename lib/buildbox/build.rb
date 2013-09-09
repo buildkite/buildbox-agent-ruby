@@ -3,7 +3,7 @@ require 'hashie/mash'
 
 module Buildbox
   class Build < Hashie::Mash
-    class Status
+    class State
       STARTED  = 'started'
       FINISHED = 'finished'
     end
@@ -17,8 +17,8 @@ module Buildbox
     attr_reader :parts
 
     def initialize(*args)
-      @parts = []
       super(*args)
+      @parts = []
     end
 
     def success?
@@ -26,11 +26,11 @@ module Buildbox
     end
 
     def started?
-      status == Status::STARTED
+      state == State::STARTED
     end
 
     def finished?
-      status == Status::FINISHED
+      state == State::FINISHED
     end
 
     def namespace
