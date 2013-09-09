@@ -111,7 +111,9 @@ module Buildbox
     def help
 <<HELP
 
-  agent   #  agent management (setup, server)
+  auth:login  [api_key]      # login to buildbox
+  agent:setup [access_token] # set the access token for the agent
+  agent:start                # start the buildbox agent
   version  #  display version
 
 HELP
