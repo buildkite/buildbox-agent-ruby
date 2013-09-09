@@ -18,7 +18,7 @@ module Buildbox
 
     def run(*args)
       # Create the build part
-      build_part = Build::Part.new(:command => args.join(' '), :output => '')
+      build_part = Build::Part.new(:command => args.join(' '), :output => '', :started_at => Time.now.utc)
       @build.parts << build_part
 
       # Run the command and capture output
@@ -29,6 +29,7 @@ module Buildbox
       # Set the output again because we may have missed some in the block
       build_part.output      = result.output
       build_part.exit_status = result.exit_status
+      build_part.finished_at = Time.now.utc
 
       raise CommandFailedError unless build_part.success?
 
