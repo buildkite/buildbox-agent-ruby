@@ -1,17 +1,20 @@
 require 'childprocess'
 require 'pty'
 
+# Inspiration from:
+# https://github.com/mitchellh/vagrant/blob/master/lib/vagrant/util/subprocess.rb
+
 module Buildbox
   class Command
-    class Result < Struct.new(:output, :exit_status)
-    end
+    # The chunk size for reading from subprocess IO.
+    READ_CHUNK_SIZE = 4096
 
-    def self.command(command, options = {}, &block)
-      new(command, options).start(&block)
-    end
+    attr_reader :output, :exit_status
 
-    def self.script(script, options = {}, &block)
-      new(script, options).start(&block)
+    def self.run(command, options = {}, &block)
+      runner = new(command, options)
+      runner.start(&block)
+      runner
     end
 
     def initialize(arguments, options = {})
@@ -49,8 +52,8 @@ module Buildbox
 
       process.wait
 
-      # the final result!
-      Result.new(output.chomp, process.exit_code)
+      @output      = output.chomp
+      @exit_status = process.exit_code
     end
 
     private
