@@ -23,7 +23,7 @@ module Buildbox
     end
 
     def update_build(build)
-      put(build.url, :state => build.state, :parts => build.parts)
+      put(build.url, :output => build.output, :exit_status => build.exit_status)
     end
 
     private

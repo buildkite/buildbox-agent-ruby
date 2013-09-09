@@ -14,9 +14,9 @@ module Buildbox
       loop do
         # There is an edge case where the build finishes between making the
         # update_build http call, and breaking. So to make sure we're using the
-        # same build object throughout this call, we can just deep dup it.
-        build = Marshal.load(Marshal.dump(@build))
-        @api.update_build(build)
+        # same build object throughout this call, we can just dup it.
+        build = @build.dup
+        @api.update_build(build) if build.started?
 
         if build.finished?
           break

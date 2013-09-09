@@ -43,7 +43,7 @@ module Buildbox
         raise "Build is missing environment variable #{env}" unless @build.env[env]
       end
 
-      @build.state = Build::State::STARTED
+      @build.status = Build::Status::STARTED
 
       # Ensure we have a working directory to run the build in
       @working_directory = @build.project.working_directory || default_working_directory
@@ -73,7 +73,7 @@ module Buildbox
       rescue CommandFailedError
       end
 
-      @build.state = Build::State::FINISHED
+      @build.status = Build::Status::FINISHED
     end
 
     private
