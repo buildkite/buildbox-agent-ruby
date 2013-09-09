@@ -3,16 +3,41 @@ require 'hashie/mash'
 
 module Buildbox
   class Build < Hashie::Mash
+    class Status
+      STARTED  = 'started'
+      FINISHED = 'finished'
+    end
+
+    class Part < Hashie::Mash
+      def success?
+        exit_status == 0
+      end
+    end
+
+    attr_reader :parts
+
+    def initialize(*args)
+      @parts = []
+      super(*args)
+    end
+
     def success?
-      exit_status == 0
+      !@parts.empty? && @parts.last.success?
     end
 
     def started?
-      output.kind_of?(String) && output.length > 0
+      status == Status::STARTED
     end
 
     def finished?
-      exit_status != nil
+      status == Status::FINISHED
+    end
+
+    def namespace
+      raise "Missing project id" unless project.id
+      raise "Missing team id" unless project.team.id
+
+      "#{project.team.id}/#{project.id}"
     end
   end
 end
