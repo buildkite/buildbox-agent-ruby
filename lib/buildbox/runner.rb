@@ -84,7 +84,7 @@ module Buildbox
         run "git", "clone", @build.env["BUILDBOX_REPO"], "."
       end
 
-      run "git", "clean", "-fd"
+      run "git", "clean", "-fdq"
       run "git", "fetch", "-q"
       run "git", "checkout", "-qf", @build.env["BUILDBOX_COMMIT"]
     end
