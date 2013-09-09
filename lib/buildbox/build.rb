@@ -8,11 +8,15 @@ module Buildbox
     end
 
     def started?
-      output.kind_of?(String) && output.length > 0
+      !started_at.nil?
     end
 
     def finished?
-      exit_status != nil
+      !finished_at.nil?
+    end
+
+    def namespace
+      "#{project.team.id}/#{project.id}"
     end
   end
 end
