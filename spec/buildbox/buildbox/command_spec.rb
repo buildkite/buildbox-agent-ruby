@@ -104,7 +104,7 @@ describe Buildbox::Command do
     end
 
     it "supports utf8 characters" do
-      result = Buildbox::Command.run('echo "hello"; echo "\xE2\x98\xA0"')
+      result = Buildbox::Command.run('bash', '-c', 'echo "hello"; echo "\xE2\x98\xA0"')
 
       result.exit_status.should == 0
       # just trying to interact with the string that has utf8 in it to make sure that it
@@ -113,28 +113,13 @@ describe Buildbox::Command do
     end
 
     it "can collect chunks from within a thread" do
-      chunked_output = ''
-      result = nil
-      worker_thread = Thread.new do
-        result = Buildbox::Command.run('echo before sleep; sleep 1; echo after sleep') do |chunk|
-          unless chunk.nil?
-            chunked_output += chunk
-          end
-        end
+      chunks = []
+
+      result = Buildbox::Command.run(FIXTURES_PATH.join('sleep_script')) do |chunk|
+        chunks << chunk
       end
 
-      worker_thread.run
-      sleep(0.5)
-      result.should be_nil
-      chunked_output.should == "before sleep\n"
-
-      worker_thread.join
-
-      result.should_not be_nil
-      result.exit_status.should == 0
-      result.output.should == "before sleep\nafter sleep"
-      chunked_output.should == "before sleep\nafter sleep\n"
-      chunked_output.should == "hello world\r\n"
+      chunks.should == ["0\r\n", "1\r\n", "2\r\n"]
     end
   end
 end

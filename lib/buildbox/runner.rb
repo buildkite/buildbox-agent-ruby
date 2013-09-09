@@ -23,8 +23,8 @@ module Buildbox
       info "Running script: #{script_path}"
 
       build.output = ""
-      result = Command.script(script_path, :environment => @build.env,
-                                           :directory   => directory_path) do |chunk|
+      result = Command.run(script_path, :environment => @build.env,
+                                        :directory   => directory_path) do |chunk|
         build.output << chunk
       end
 

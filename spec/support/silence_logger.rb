@@ -8,5 +8,6 @@ RSpec.configure do |config|
     logger = Logger.new(StringIO.new)
 
     Celluloid.logger = logger
+    Buildbox.logger = logger
   end
 end

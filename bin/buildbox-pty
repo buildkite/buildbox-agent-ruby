@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+# Disable stdout,stderr buffering
+STDERR.sync = STDOUT.sync = true
+
 require 'pty'
 
 # spawn the process in a pseudo terminal so colors out outputted

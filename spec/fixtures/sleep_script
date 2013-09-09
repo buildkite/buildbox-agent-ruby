@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+3.times do |i|
+  puts i
+  sleep 1
+end

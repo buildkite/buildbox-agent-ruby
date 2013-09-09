@@ -8,6 +8,7 @@ module Buildbox
   autoload :CLI,           "buildbox/cli"
   autoload :Configuration, "buildbox/configuration"
   autoload :Monitor,       "buildbox/monitor"
+  autoload :Platform,      "buildbox/platform"
   autoload :Runner,        "buildbox/runner"
   autoload :Script,        "buildbox/script"
   autoload :Server,        "buildbox/server"
@@ -21,6 +22,10 @@ module Buildbox
 
   def self.logger
     @logger ||= Logger.new(STDOUT).tap { |logger| logger.level = Logger::INFO }
+  end
+
+  def self.logger=(logger)
+    @logger = logger
   end
 
   def self.gem_root
