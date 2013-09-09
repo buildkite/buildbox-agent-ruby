@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'celluloid'
 require 'fileutils'
-require 'yaml'
 
 module Buildbox
   class Runner
@@ -10,86 +9,45 @@ module Buildbox
 
     attr_reader :build
 
-    class CommandFailedError < StandardError; end
-
     def initialize(build)
       @build = build
     end
 
-    def run(*args)
-      # Create the build part
-      build_part = Build::Part.new(:command => args.join(' '), :output => '')
-      @build.parts << build_part
-
-      # Run the command and capture output
-      result = Command.run(*args, :environment => @build.env, :directory => @working_directory) do |chunk|
-        build_part.output << chunk
-      end
-
-      # Set the output again because we may have missed some in the block
-      build_part.output      = result.output
-      build_part.exit_status = result.exit_status
-
-      raise CommandFailedError unless build_part.success?
-
-      build_part
-    end
-
     def start
-      info "Starting to build #{@build.namespace}/#{@build.id} starting..."
+      info "Starting to build #{namespace}/#{@build.number} starting..."
 
-      # Ensure we have the right env variables needed to build
-      %w(BUILDBOX_REPO BUILDBOX_COMMIT).each do |env|
-        raise "Build is missing environment variable #{env}" unless @build.env[env]
+      FileUtils.mkdir_p(directory_path)
+      File.open(script_path, 'w+') { |file| file.write(@build.script) }
+      File.chmod(0777, script_path)
+
+      info "Running script: #{script_path}"
+
+      build.output = ""
+      result = Command.run(script_path, :environment => @build.env,
+                                        :directory   => directory_path) do |chunk|
+        build.output << chunk
       end
 
-      @build.status = Build::Status::STARTED
+      build.output      = result.output
+      build.exit_status = result.exit_status
 
-      # Ensure we have a working directory to run the build in
-      @working_directory = @build.project.working_directory || default_working_directory
-      FileUtils.mkdir_p(@working_directory)
+      File.delete(script_path)
 
-      begin
-        # Bootstrap version control and checkout the right commit
-        bootstrap_version_control
-
-        # Try and find a .buildbox.yml file
-        buildbox_yml = File.join(@working_directory, '.buildbox.yml')
-
-        if File.exist?(buildbox_yml)
-          yaml = YAML.load_file(buildbox_yml)
-          commands = [ *yaml['script'] ]
-        else
-          # Maybe there is a .buildbox file that can be executed?
-          buildbox_script = File.join(@working_directory, '.buildbox')
-          commands = [ buildbox_script ] if File.exist?(buildbox_script)
-        end
-
-        # Run the commands for the build
-        if commands && commands.any?
-          commands.each { |command| run command }
-        else
-        end
-      rescue CommandFailedError
-      end
-
-      @build.status = Build::Status::FINISHED
+      info "#{namespace} ##{@build.number} finished with exit status #{result.exit_status}"
     end
 
     private
 
-    def bootstrap_version_control
-      unless File.exist?(File.join(@working_directory, '.git'))
-        run "git", "clone", @build.env["BUILDBOX_REPO"], "."
-      end
-
-      run "git", "clean", "-fd"
-      run "git", "fetch", "-q"
-      run "git", "checkout", "-qf", @build.env["BUILDBOX_COMMIT"]
+    def directory_path
+      @directory_path ||= Buildbox.root_path.join(namespace)
     end
 
-    def default_working_directory
-      Buildbox.root_path.join(@build.namespace)
+    def script_path
+      @script_path ||= Buildbox.root_path.join("buildbox-#{namespace.gsub(/\//, '-')}-#{@build.number}")
+    end
+
+    def namespace
+      "#{@build.project.team.name}/#{@build.project.name}"
     end
   end
 end
