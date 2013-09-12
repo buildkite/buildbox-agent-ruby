@@ -10,8 +10,9 @@ module Buildbox
 
     def cancel
       @build.cancel_started = true
-      p "ZOMG CANCEL #{@build.id}"
-      p "============================"
+
+      # Kill that damn process, yo!
+      Process.kill 'INT', @build.pid
     end
   end
 end

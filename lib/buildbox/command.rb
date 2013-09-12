@@ -13,7 +13,7 @@ module Buildbox
     # the given timeout.
     class TimeoutExceeded < StandardError; end
 
-    attr_reader :output, :exit_status
+    attr_reader :pid, :output, :exit_status
 
     def self.run(*args, &block)
       options   = args.last.is_a?(Hash) ? args.pop : {}
@@ -70,6 +70,9 @@ module Buildbox
         write_pipe.close
       end
 
+      # Store the process id for later cancelling!
+      @pid = process.pid
+
       # Record the start time for timeout purposes
       start_time = Time.now.to_i
 
@@ -97,7 +100,7 @@ module Buildbox
             next if data.empty?
 
             output << cleaned_data = UTF8.clean(data)
-            yield cleaned_data if block_given?
+            yield self, cleaned_data if block_given?
           end
         end
 

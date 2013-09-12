@@ -25,7 +25,8 @@ module Buildbox
       @build.started_at = Time.now.utc
 
       build.output = ""
-      result = Command.run(script_path, :environment => @build.env, :directory => directory_path) do |chunk|
+      result = Command.run(script_path, :environment => @build.env, :directory => directory_path) do |command, chunk|
+        build.pid = command.pid
         build.output << chunk
       end
 
