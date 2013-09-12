@@ -5,6 +5,7 @@ module Buildbox
   autoload :API,           "buildbox/api"
   autoload :Build,         "buildbox/build"
   autoload :Command,       "buildbox/command"
+  autoload :Canceler,      "buildbox/canceler"
   autoload :CLI,           "buildbox/cli"
   autoload :Configuration, "buildbox/configuration"
   autoload :Monitor,       "buildbox/monitor"

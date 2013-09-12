@@ -7,6 +7,10 @@ module Buildbox
       exit_status == 0
     end
 
+    def cancelling?
+      cancel_started == true
+    end
+
     def started?
       !started_at.nil?
     end

@@ -16,7 +16,18 @@ module Buildbox
         # update_build http call, and breaking. So to make sure we're using the
         # same build object throughout this call, we can just deep dup it.
         build = Marshal.load(Marshal.dump(@build))
-        @api.update_build(build) if build.started? || build.finished?
+
+        if build.started? || build.finished?
+          new_build = @api.update_build(build)
+
+          p new_build.state
+
+          # Try and cancel the build if we haven't tried already
+          if new_build.state == 'canceled' && !@build.cancelling?
+            p 'going tot ry and cancel'
+            Buildbox::Canceler.cancel(@build)
+          end
+        end
 
         if build.finished?
           break
