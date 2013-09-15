@@ -188,7 +188,9 @@ module Buildbox
           # since we use some Ruby 1.9 specific exceptions.
 
           breakable = false
-          if e.is_a?(EOFError)
+
+          # EOFError from OSX, EIO is raised by ubuntu
+          if e.is_a?(EOFError) || e.is_a?(Errno::EIO)
             # An `EOFError` means this IO object is done!
             breakable = true
           elsif defined?(IO::WaitReadable) && e.is_a?(IO::WaitReadable)
@@ -198,7 +200,7 @@ module Buildbox
             # IO object is not ready to be read from yet. No problem,
             # we read as much as we can, so we break.
             breakable = true
-          elsif e.is_a?(Errno::EAGAIN)
+          elsif e.is_a?(Errno::EAGAIN) || e.is_a?(Errno::EWOULDBLOCK)
             # Otherwise, we just look for the EAGAIN error which should be
             # all that IO::WaitReadable does in Ruby 1.9.
             breakable = true
