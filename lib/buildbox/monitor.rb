@@ -20,11 +20,8 @@ module Buildbox
         if build.started? || build.finished?
           new_build = @api.update_build(build)
 
-          p new_build.state
-
           # Try and cancel the build if we haven't tried already
           if new_build.state == 'canceled' && !@build.cancelling?
-            p 'going tot ry and cancel'
             Buildbox::Canceler.cancel(@build)
           end
         end
@@ -32,7 +29,7 @@ module Buildbox
         if build.finished?
           break
         else
-          sleep 3 # 3 seconds seems reasonable for now
+          sleep 2 # 2 seconds seems reasonable for now
         end
       end
     end
