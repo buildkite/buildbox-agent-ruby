@@ -44,11 +44,11 @@ module Buildbox
       process     = ChildProcess.build(*arguments)
       process.cwd = File.expand_path(@options[:directory] || Dir.pwd)
 
-      # Create the pipes so we can read the output in real time. PTY.spawn
+      # Create the pipes so we can read the output in real time. PTY
       # isn't avaible on all platforms (heroku) so we just fallback to IO.pipe
       # if it's not presetnt.
       read_pipe, write_pipe = begin
-                                PTY.spawn
+                                PTY.open
                               rescue
                                 IO.pipe
                               end

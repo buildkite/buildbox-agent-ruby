@@ -96,7 +96,7 @@ describe Buildbox::Command do
     end
 
     it "still runs even if pty isn't available" do
-      PTY.should_receive(:spawn).and_raise(RuntimeError.new)
+      PTY.should_receive(:open).and_raise(RuntimeError.new)
       result = Buildbox::Command.run('echo', 'hello world')
 
       result.exit_status.should == 0
