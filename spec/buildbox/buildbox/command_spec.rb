@@ -5,34 +5,34 @@ require "spec_helper"
 describe Buildbox::Command do
   describe "#run" do
     it "is run within a tty" do
-      result = Buildbox::Command.run(%{ruby -e "puts STDOUT.tty?"})
+      result = Buildbox::Command.run("ruby", "-e", "puts STDOUT.tty?")
 
       result.output.should == "true"
     end
 
     it "successfully runs and returns the output from a simple comment" do
-      result = Buildbox::Command.run('echo hello world')
+      result = Buildbox::Command.run('echo', 'hello world')
 
       result.exit_status.should == 0
       result.output.should == "hello world"
     end
 
-    it "redirects stdout to stderr" do
-      result = Buildbox::Command.run('echo hello world 1>&2')
+    it "includes stderr" do
+      result = Buildbox::Command.run("ruby", "-e", "STDERR.puts 'stderr lol'")
 
       result.exit_status.should == 0
-      result.output.should == "hello world"
+      result.output.should == "stderr lol"
     end
 
     it "handles commands that fail and returns the correct status" do
-      result = Buildbox::Command.run('(exit 1)')
+      result = Buildbox::Command.run('bash', '-c', 'exit 123')
 
-      result.exit_status.should_not == 0
+      result.exit_status.should == 123
       result.output.should == ''
     end
 
     it "handles running malformed commands" do
-      result = Buildbox::Command.run('if (')
+      result = Buildbox::Command.run('bash', '-c', 'if (')
 
       result.exit_status.should_not == 0
       # bash 3.2.48 prints "syntax error" in lowercase.
@@ -45,7 +45,7 @@ describe Buildbox::Command do
 
     it "can collect output in chunks" do
       chunked_output = ''
-      result = Buildbox::Command.run('echo hello world') do |command, chunk|
+      result = Buildbox::Command.run('echo', 'hello world') do |command, chunk|
         unless chunk.nil?
           chunked_output += chunk
         end
@@ -60,8 +60,8 @@ describe Buildbox::Command do
       result = nil
       second_result = nil
       thread = Thread.new do
-        result = Buildbox::Command.run('sillycommandlololol')
-        second_result = Buildbox::Command.run('export FOO=bar; doesntexist.rb')
+        result = Buildbox::Command.run('bash', '-c', 'sillycommandlololol')
+        second_result = Buildbox::Command.run('bash', '-c', 'export FOO=bar; doesntexist.rb')
       end
       thread.join
 
@@ -76,7 +76,7 @@ describe Buildbox::Command do
 
     it "captures color'd output from a command" do
       chunked_output = ''
-      result = Buildbox::Command.run("rspec #{FIXTURES_PATH.join('rspec', 'test_spec.rb')}") do |command, chunk|
+      result = Buildbox::Command.run('rspec', FIXTURES_PATH.join('rspec', 'test_spec.rb')) do |command, chunk|
         chunked_output += chunk unless chunk.nil?
       end
 
@@ -97,7 +97,7 @@ describe Buildbox::Command do
 
     it "still runs even if pty isn't available" do
       PTY.should_receive(:spawn).and_raise(RuntimeError.new)
-      result = Buildbox::Command.run('echo hello world')
+      result = Buildbox::Command.run('echo', 'hello world')
 
       result.exit_status.should == 0
       result.output.should == "hello world"
@@ -119,7 +119,7 @@ describe Buildbox::Command do
         chunks << chunk
       end
 
-      chunks.should == ["0\r\n", "1\r\n", "2\r\n"]
+      chunks.should == ["test 0\r\n", "test 1\r\n", "test 2\r\n"]
     end
   end
 end

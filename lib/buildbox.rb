@@ -29,10 +29,6 @@ module Buildbox
     @logger = logger
   end
 
-  def self.gem_root
-    path = File.expand_path(File.join(__FILE__, "..", ".."))
-  end
-
   def self.root_path
     path = Pathname.new File.join(ENV['HOME'], ".buildbox")
     path.mkpath unless path.exist?

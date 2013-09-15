@@ -36,7 +36,7 @@ module Buildbox
       timeout = @options[:timeout]
 
       # Build the command we're going to run
-      arguments = [ *runner, *@arguments ].compact.map(&:to_s) # all arguments must be a string
+      arguments = [ *@arguments ].compact.map(&:to_s) # all arguments must be a string
 
       # Build the ChildProcess
       @logger.info("Starting process: #{arguments}")
@@ -44,8 +44,15 @@ module Buildbox
       process     = ChildProcess.build(*arguments)
       process.cwd = File.expand_path(@options[:directory] || Dir.pwd)
 
-      # Create the pipes so we can read the output in real tim
-      read_pipe, write_pipe = IO.pipe
+      # Create the pipes so we can read the output in real time. PTY.spawn
+      # isn't avaible on all platforms (heroku) so we just fallback to IO.pipe
+      # if it's not presetnt.
+      read_pipe, write_pipe = begin
+                                PTY.spawn
+                              rescue
+                                IO.pipe
+                              end
+
       process.io.stdout     = write_pipe
       process.io.stderr     = write_pipe
       process.duplex        = true
@@ -133,7 +140,7 @@ module Buildbox
       # If there's some that we missed
       if extra_data != ""
         output << cleaned_data = UTF8.clean(extra_data)
-        yield cleaned_data if block_given?
+        yield self, cleaned_data if block_given?
       end
 
       if RUBY_PLATFORM == "java"
@@ -147,18 +154,6 @@ module Buildbox
     end
 
     private
-
-    # on heroku, tty isn't avaiable. so we result to just running command through
-    # bash. the downside to this, is that stuff colors aren't outputted because
-    # processes don't think they're being in a terminal.
-    def runner
-      require 'pty'
-      PTY.spawn('whoami')
-
-      [ File.join(Buildbox.gem_root, "bin", "buildbox-pty") ]
-    rescue
-      [ "bash", "-c" ]
-    end
 
     # Reads data from an IO object while it can, returning the data it reads.
     # When it encounters a case when it can't read anymore, it returns the

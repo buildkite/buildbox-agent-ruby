@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
 3.times do |i|
-  puts i
+  puts "test #{i}"
   sleep 1
 end
