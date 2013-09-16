@@ -5,14 +5,18 @@
 Install the gem
 
     $ gem install buildbox
+    
+Authenticate
+
+    $ buildbox auth:login [api_key]
 
 Add your worker tokens
 
-    $ buildbox worker:add [token]
+    $ buildbox agent:setup [token]
 
 Then you can start monitoring for builds like so:
 
-    $ buildbox worker:start
+    $ buildbox agent:start
 
 For more help with the command line interface
 
