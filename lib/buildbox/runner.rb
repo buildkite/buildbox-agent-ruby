@@ -7,8 +7,6 @@ module Buildbox
     include Celluloid
     include Celluloid::Logger
 
-    attr_reader :build
-
     def initialize(build)
       @build = build
     end
@@ -24,20 +22,21 @@ module Buildbox
 
       @build.started_at = Time.now.utc
 
-      build.output = ""
-      result = Command.run(script_path, :environment => @build.env, :directory => directory_path) do |command, chunk|
-        build.pid = command.pid
-        build.output << chunk
-      end
+      command = Command.new(script_path, :environment => @build.env, :directory => directory_path)
 
-      build.output      = result.output
-      build.exit_status = result.exit_status
+      @build.output  = ""
+      @build.process = command.process
+
+      command.start { |chunk| @build.output << chunk }
+
+      @build.output      = command.output
+      @build.exit_status = command.exit_status
 
       File.delete(script_path)
 
       @build.finished_at = Time.now.utc
 
-      info "#{@build.namespace} ##{@build.id} finished with exit status #{result.exit_status}"
+      info "#{@build.namespace} ##{@build.id} finished with exit status #{command.exit_status}"
     end
 
     private

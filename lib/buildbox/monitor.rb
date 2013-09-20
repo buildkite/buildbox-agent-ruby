@@ -12,24 +12,22 @@ module Buildbox
 
     def monitor
       loop do
-        # There is an edge case where the build finishes between making the
-        # update_build http call, and breaking. So to make sure we're using the
-        # same build object throughout this call, we can just deep dup it.
-        build = Marshal.load(Marshal.dump(@build))
+        # As the build can finish in between doing the update_build api_call
+        # and checking to see if the build has finished, we make sure we use the
+        # same finished_at timestamp throughout the entire method.
+        finished_at = @build.finished_at
 
-        if build.started? || build.finished?
-          new_build = @api.update_build(build)
+        updated_build = @api.update_build(@build.url, @build.started_at, finished_at,
+                                          @build.output, @build.exit_status)
 
-          # Try and cancel the build if we haven't tried already
-          if new_build.state == 'canceled' && !@build.cancelling?
-            Buildbox::Canceler.cancel(@build)
-          end
+        if updated_build.state == 'canceled' && !@build.cancelling?
+          Buildbox::Canceler.new(@build).async.cancel
         end
 
-        if build.finished?
+        if finished_at
           break
         else
-          sleep 2 # 2 seconds seems reasonable for now
+          sleep 1
         end
       end
     end

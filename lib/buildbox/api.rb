@@ -22,11 +22,11 @@ module Buildbox
       get(project.scheduled_builds_url).map { |build| Buildbox::Build.new(build) }
     end
 
-    def update_build(build)
-      put(build.url, :started_at  => build.started_at,
-                     :finished_at => build.finished_at,
-                     :output      => build.output,
-                     :exit_status => build.exit_status)
+    def update_build(url, started_at, finished_at, output, exit_status)
+      put(url, :started_at  => started_at,
+               :finished_at => finished_at,
+               :output      => output,
+               :exit_status => exit_status)
     end
 
     private

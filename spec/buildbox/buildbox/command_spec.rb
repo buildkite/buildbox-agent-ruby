@@ -45,7 +45,7 @@ describe Buildbox::Command do
 
     it "can collect output in chunks" do
       chunked_output = ''
-      result = Buildbox::Command.run('echo', 'hello world') do |command, chunk|
+      result = Buildbox::Command.run('echo', 'hello world') do |chunk|
         unless chunk.nil?
           chunked_output += chunk
         end
@@ -76,7 +76,7 @@ describe Buildbox::Command do
 
     it "captures color'd output from a command" do
       chunked_output = ''
-      result = Buildbox::Command.run('rspec', FIXTURES_PATH.join('rspec', 'test_spec.rb')) do |command, chunk|
+      result = Buildbox::Command.run('rspec', FIXTURES_PATH.join('rspec', 'test_spec.rb')) do |chunk|
         chunked_output += chunk unless chunk.nil?
       end
 
@@ -87,7 +87,7 @@ describe Buildbox::Command do
 
     it "runs scripts in a tty" do
       chunked_output = ''
-      result = Buildbox::Command.run(FIXTURES_PATH.join('tty_script')) do |command, chunk|
+      result = Buildbox::Command.run(FIXTURES_PATH.join('tty_script')) do |chunk|
         chunked_output += chunk unless chunk.nil?
       end
 
@@ -115,7 +115,7 @@ describe Buildbox::Command do
     it "can collect chunks from within a thread" do
       chunks = []
 
-      result = Buildbox::Command.run(FIXTURES_PATH.join('sleep_script')) do |command, chunk|
+      result = Buildbox::Command.run(FIXTURES_PATH.join('sleep_script')) do |chunk|
         chunks << chunk
       end
 

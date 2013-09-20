@@ -13,35 +13,40 @@ module Buildbox
     # the given timeout.
     class TimeoutExceeded < StandardError; end
 
-    attr_reader :pid, :output, :exit_status
+    attr_reader :output, :exit_status
 
     def self.run(*args, &block)
-      options   = args.last.is_a?(Hash) ? args.pop : {}
-      arguments = args.dup
-
-      # Run the command
-      command = new(arguments, options, &block)
+      command = new(*args, &block)
       command.start(&block)
       command
     end
 
-    def initialize(arguments, options = {})
-      @arguments = arguments
-      @options   = options
+    def initialize(*args)
+      @options   = args.last.is_a?(Hash) ? args.pop : {}
+      @arguments = args.dup
       @logger    = Buildbox.logger
+    end
+
+    def arguments
+      [ *@arguments ].compact.map(&:to_s) # all arguments must be a string
+    end
+
+    def process
+      @process ||= ChildProcess.build(*arguments)
     end
 
     def start(&block)
       # Get the timeout, if we have one
       timeout = @options[:timeout]
 
-      # Build the command we're going to run
-      arguments = [ *@arguments ].compact.map(&:to_s) # all arguments must be a string
-
       # Build the ChildProcess
       @logger.info("Starting process: #{arguments}")
 
-      process     = ChildProcess.build(*arguments)
+      # fork+exec can be very expensive on *nix platforms. We can minimize the memory
+      # by using posix spawn. More info here: https://github.com/rtomayko/posix-spawn
+      ChildProcess.posix_spawn = true
+
+      # Set the directory for the process
       process.cwd = File.expand_path(@options[:directory] || Dir.pwd)
 
       # Create the pipes so we can read the output in real time. PTY
@@ -70,15 +75,14 @@ module Buildbox
       # Make sure the stdin does not buffer
       process.io.stdin.sync = true
 
+      @logger.info("Process started with PID: #{process.pid} and Group ID: #{Process.getpgid(process.pid)}")
+
       if RUBY_PLATFORM != "java"
         # On Java, we have to close after. See down the method...
         # Otherwise, we close the writer right here, since we're
         # not on the writing side.
         write_pipe.close
       end
-
-      # Store the process id for later cancelling!
-      @pid = process.pid
 
       # Record the start time for timeout purposes
       start_time = Time.now.to_i
@@ -107,7 +111,7 @@ module Buildbox
             next if data.empty?
 
             output << cleaned_data = UTF8.clean(data)
-            yield self, cleaned_data if block_given?
+            yield cleaned_data if block_given?
           end
         end
 
@@ -140,7 +144,7 @@ module Buildbox
       # If there's some that we missed
       if extra_data != ""
         output << cleaned_data = UTF8.clean(extra_data)
-        yield self, cleaned_data if block_given?
+        yield cleaned_data if block_given?
       end
 
       if RUBY_PLATFORM == "java"
