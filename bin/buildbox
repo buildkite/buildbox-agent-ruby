@@ -3,6 +3,9 @@
 # Disable stdout,stderr buffering
 STDERR.sync = STDOUT.sync = true
 
+# Set the process name before we go to far in
+$PROGRAM_NAME = 'buildbox'
+
 dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(dir) unless $LOAD_PATH.include?(dir)
 
