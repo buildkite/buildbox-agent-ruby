@@ -5,6 +5,9 @@ require 'hashie/mash'
 
 module Buildbox
   class API
+    RETRYABLE_EXCEPTIONS = [ 'Timeout::Error', 'Errno::EINVAL', 'Errno::ECONNRESET', 'EOFError', 'Net::HTTPBadResponse',
+                             'Net::HTTPHeaderSyntaxError', 'Net::ProtocolError', 'Errno::EPIPE' ]
+
     def initialize(config = Buildbox.config)
       @config  = config
     end
@@ -34,6 +37,9 @@ module Buildbox
     def connection
       @connection ||= Faraday.new(:url => @config.api_endpoint) do |faraday|
         faraday.basic_auth @api_key || @config.api_key, ''
+
+        # Retry when some random things happen
+        faraday.request :retry, :max => 3, :interval => 1, :exceptions => RETRYABLE_EXCEPTIONS
 
         faraday.request  :json
 
