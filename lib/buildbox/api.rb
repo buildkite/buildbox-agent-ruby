@@ -40,12 +40,16 @@ module Buildbox
         faraday.response :logger, Buildbox.logger
         faraday.response :mashify
 
-        # json needs to come after mashify as it needs to run before the mashify
+        # JSON needs to come after mashify as it needs to run before the mashify
         # middleware.
         faraday.response :json
         faraday.response :raise_error
 
         faraday.adapter Faraday.default_adapter
+
+        # Set some sensible defaults on the adapter.
+        faraday.options[:timeout]      = 60
+        faraday.options[:open_timeout] = 60
       end
     end
 
