@@ -20,12 +20,12 @@ module Buildbox
 
       info "Running script: #{script_path}"
 
-      @build.started_at = Time.now.utc
 
       command = Command.new(script_path, :environment => @build.env, :directory => directory_path)
 
-      @build.output  = ""
-      @build.process = command.process
+      @build.output     = ""
+      @build.process    = command.process
+      @build.started_at = Time.now.utc
 
       command.start { |chunk| @build.output << chunk }
 

@@ -12,23 +12,23 @@ module Buildbox
 
     def monitor
       loop do
-        # As the build can finish in between doing the update_build api_call
-        # and checking to see if the build has finished, we make sure we use the
-        # same finished_at timestamp throughout the entire method.
-        finished_at = @build.finished_at
+        if @build.started?
+          # As the build can finish in between doing the update_build api_call
+          # and checking to see if the build has finished, we make sure we use the
+          # same finished_at timestamp throughout the entire method.
+          finished_at = @build.finished_at
 
-        updated_build = @api.update_build(@build.url, @build.started_at, finished_at,
-                                          @build.output, @build.exit_status)
+          updated_build = @api.update_build(@build.url, @build.started_at, finished_at,
+                                            @build.output, @build.exit_status)
 
-        if updated_build.state == 'canceled' && !@build.cancelling?
-          Buildbox::Canceler.new(@build).async.cancel
+          if updated_build.state == 'canceled' && !@build.cancelling?
+            Buildbox::Canceler.new(@build).async.cancel
+          end
+
+          break if finished_at
         end
 
-        if finished_at
-          break
-        else
-          sleep 1
-        end
+        sleep 1
       end
     end
   end
