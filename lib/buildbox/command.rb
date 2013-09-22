@@ -42,10 +42,6 @@ module Buildbox
       # Build the ChildProcess
       @logger.info("Starting process: #{arguments}")
 
-      # fork+exec can be very expensive on *nix platforms. We can minimize the memory
-      # by using posix spawn. More info here: https://github.com/rtomayko/posix-spawn
-      ChildProcess.posix_spawn = true
-
       # Set the directory for the process
       process.cwd = File.expand_path(@options[:directory] || Dir.pwd)
 

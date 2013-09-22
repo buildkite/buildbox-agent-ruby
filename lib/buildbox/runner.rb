@@ -20,7 +20,6 @@ module Buildbox
 
       info "Running script: #{script_path}"
 
-
       command = Command.new(script_path, :environment => @build.env, :directory => directory_path)
 
       @build.output     = ""
