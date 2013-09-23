@@ -6,13 +6,15 @@ STDERR.sync = STDOUT.sync = true
 # Set the process name before we go to far in
 $PROGRAM_NAME = 'buildbox'
 
-dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
-$LOAD_PATH.unshift(dir) unless $LOAD_PATH.include?(dir)
+# Add the buildbox lib directory to the load path
+root_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+lib_dir  = File.join(root_dir, 'lib')
+$LOAD_PATH.unshift(lib_dir) unless $LOAD_PATH.include?(lib_dir)
+
+# Setup bundler correctly
+ENV['BUNDLE_GEMFILE'] ||= File.join(root_dir, "Gemfile")
+require 'bundler/setup'
 
 require 'buildbox'
-
-if ENV['DEBUG'] == 'true'
-  Buildbox.logger.level = Logger::DEBUG
-end
-
+Buildbox.logger.level = Logger::DEBUG if ENV['DEBUG'] == 'true'
 Buildbox::CLI.new(ARGV).parse
