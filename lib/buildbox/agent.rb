@@ -11,7 +11,16 @@ module Buildbox
     end
 
     def work
-      running_builds = scheduled_builds.map do |build|
+      builds = scheduled_builds
+
+      # Start off by letting each build know that it's been picked up
+      # by an agent.
+      builds.each do |build|
+        @api.update_build(build, :agent_accepted => @access_token)
+      end
+
+      # Then do some stuff...
+      builds.each do |build|
         Monitor.new(build, @api).async.monitor
         Runner.new(build).async.start
       end
@@ -19,17 +28,12 @@ module Buildbox
 
     private
 
-    def projects
-      @api.agent(@access_token, hostname).projects
-    rescue Buildbox::API::AgentNotFoundError
-      warn "Agent #{@access_token} doesn't exist"
-      [] # return empty array to avoid breakage
-    end
-
     def scheduled_builds
-      projects.map do |project|
-        @api.scheduled_builds(project)
-      end.flatten
+      agent = @api.agent(@access_token, hostname)
+      @api.scheduled_builds agent
+    rescue Buildbox::API::AgentNotFoundError
+      warn "Agent `#{@access_token}` doesn't exist"
+      [] # return empty array to avoid breakage
     end
 
     def hostname

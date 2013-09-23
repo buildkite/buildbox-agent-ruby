@@ -5,16 +5,24 @@ require 'delegate'
 
 module Buildbox
   class API
-    class Logger < SimpleDelegator
+    # Faraday uses debug to show response information, but when the agent is in
+    # DEBUG mode, it's kinda useless noise. So we use a ProxyLogger to only push
+    # the information we care about to the logger.
+    class ProxyLogger
+      def initialize(logger)
+        @logger = logger
+      end
       def info(*args)
-        debug(*args)
+        @logger.debug(*args)
+      end
+
+      def debug(*args)
+        # no-op
       end
     end
 
     class AgentNotFoundError < Faraday::Error::ClientError; end
-
-    RETRYABLE_EXCEPTIONS = [ 'Timeout::Error', 'Errno::EINVAL', 'Errno::ECONNRESET', 'EOFError', 'Net::HTTPBadResponse',
-                             'Net::HTTPHeaderSyntaxError', 'Net::ProtocolError', 'Errno::EPIPE' ]
+    class ServerError < Faraday::Error::ClientError; end
 
     def initialize(config = Buildbox.config, logger = Buildbox.logger)
       @config = config
@@ -23,24 +31,26 @@ module Buildbox
 
     def authenticate(api_key)
       @api_key = api_key
+
       get("user")
     end
 
     def agent(access_token, hostname)
       put("agents/#{access_token}", :hostname => hostname)
-    rescue Faraday::Error::ClientError
-      raise AgentNotFoundError
+    rescue Faraday::Error::ClientError => e
+      if e.response[:status] == 404
+        raise AgentNotFoundError.new(e, e.response)
+      else
+        raise ServerError.new(e, e.response)
+      end
     end
 
-    def scheduled_builds(project)
-      get(project.scheduled_builds_url).map { |build| Buildbox::Build.new(build) }
+    def scheduled_builds(agent)
+      get(agent.scheduled_builds_url).map { |build| Buildbox::Build.new(build) }
     end
 
-    def update_build(url, started_at, finished_at, output, exit_status)
-      put(url, :started_at  => started_at,
-               :finished_at => finished_at,
-               :output      => output,
-               :exit_status => exit_status)
+    def update_build(build, options)
+      put(build.url, options)
     end
 
     private
@@ -48,13 +58,10 @@ module Buildbox
     def connection
       @connection ||= Faraday.new(:url => @config.api_endpoint) do |faraday|
         faraday.basic_auth @api_key || @config.api_key, ''
+        faraday.request :retry
+        faraday.request :json
 
-        # Retry when some random things happen
-        faraday.request :retry, :max => 3, :interval => 1, :exceptions => RETRYABLE_EXCEPTIONS
-
-        faraday.request  :json
-
-        faraday.response :logger, Logger.new(@logger)
+        faraday.response :logger, ProxyLogger.new(@logger)
         faraday.response :mashify
 
         # JSON needs to come after mashify as it needs to run before the mashify
@@ -72,7 +79,8 @@ module Buildbox
 
     def post(path, body = {})
       connection.post(path) do |request|
-        request.body = body
+        request.body                    = body
+        request.headers['Content-Type'] = 'application/json'
       end.body
     end
 
