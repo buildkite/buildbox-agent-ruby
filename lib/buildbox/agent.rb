@@ -13,14 +13,11 @@ module Buildbox
     def work
       builds = scheduled_builds
 
-      # Start off by letting each build know that it's been picked up
-      # by an agent.
-      builds.each do |build|
-        @api.update_build(build, :agent_accepted => @access_token)
-      end
-
       # Run the builds one at a time
       builds.each do |build|
+        # Let the agent know that we're about to start working on this build
+        @api.update_build(build, :agent_accepted => @access_token)
+
         Monitor.new(build, @api).async.monitor
         Runner.new(build).start
       end
