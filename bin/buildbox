@@ -11,6 +11,10 @@ root_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 lib_dir  = File.join(root_dir, 'lib')
 $LOAD_PATH.unshift(lib_dir) unless $LOAD_PATH.include?(lib_dir)
 
+# Setup bundler correctly
+ENV['BUNDLE_GEMFILE'] ||= File.join(root_dir, "Gemfile")
+require 'bundler/setup'
+
 require 'buildbox'
 Buildbox.logger.level = Logger::DEBUG if ENV['DEBUG'] == 'true'
 Buildbox::CLI.new(ARGV).parse

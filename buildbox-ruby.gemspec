@@ -24,4 +24,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'multi_json',         '~> 1.7'
   spec.add_dependency 'celluloid',          '~> 0.14'
   spec.add_dependency 'childprocess',       '~> 0.3'
+
+  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'webmock'
 end
