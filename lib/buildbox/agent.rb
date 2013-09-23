@@ -3,9 +3,10 @@ require 'celluloid'
 
 module Buildbox
   class Agent
+    include Celluloid
     include Celluloid::Logger
 
-    def initialize(access_token, api)
+    def initialize(access_token, api = Buildbox::API.new)
       @api          = api
       @access_token = access_token
     end
@@ -24,7 +25,7 @@ module Buildbox
 
     def projects
       @api.agent(@access_token, hostname).projects
-    rescue Faraday::Error::ClientError
+    rescue Buildbox::API::AgentNotFoundError
       warn "Agent #{@access_token} doesn't exist"
       [] # return empty array to avoid breakage
     end

@@ -5,26 +5,26 @@ module Buildbox
     def initialize(config = Buildbox.config, logger = Buildbox.logger)
       @config = config
       @logger = logger
+      @agents = []
     end
 
     def start
+      agent_access_tokens.each do |access_token|
+        @agents << Buildbox::Agent.new(access_token)
+      end
+
       loop do
-        @config.check
-        @config.reload
+        @agents.each { |agent| agent.async.work }
 
-        agent_access_tokens.each do |access_token|
-          Buildbox::Agent.new(access_token, api).work
-        end
-
-        @logger.info "Sleeping for #{INTERVAL} seconds"
-        sleep INTERVAL
+        wait INTERVAL
       end
     end
 
     private
 
-    def api
-      @api ||= Buildbox::API.new
+    def wait(interval)
+      @logger.info "Sleeping for #{interval} seconds"
+      sleep interval
     end
 
     def agent_access_tokens

@@ -72,7 +72,8 @@ module Buildbox
           Buildbox.config.update(:agent_access_tokens => agent_access_tokens << access_token)
 
           puts "Successfully added agent access token"
-          puts "You can now start the agent with: buildbox agent:start"
+          puts "You can now start the agent with: buildbox agent:start."
+          puts "If the agent is already running, you'll have to restart it for the new changes to take effect"
         elsif command == "auth:login"
           if @argv.length == 0
             puts "No api key provided"

@@ -5,6 +5,8 @@ require 'hashie/mash'
 
 module Buildbox
   class API
+    class AgentNotFoundError < Faraday::Error::ClientError; end
+
     RETRYABLE_EXCEPTIONS = [ 'Timeout::Error', 'Errno::EINVAL', 'Errno::ECONNRESET', 'EOFError', 'Net::HTTPBadResponse',
                              'Net::HTTPHeaderSyntaxError', 'Net::ProtocolError', 'Errno::EPIPE' ]
 
@@ -19,6 +21,8 @@ module Buildbox
 
     def agent(access_token, hostname)
       put("agents/#{access_token}", :hostname => hostname)
+    rescue Faraday::Error::ClientError
+      raise AgentNotFoundError
     end
 
     def scheduled_builds(project)
