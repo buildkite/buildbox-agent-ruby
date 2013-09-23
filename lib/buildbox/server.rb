@@ -5,8 +5,8 @@ module Buildbox
     INTERVAL = 5
 
     def initialize(config = Buildbox.config, logger = Buildbox.logger)
-      @config = config
-      @logger = logger
+      @config      = config
+      @logger      = logger
       @supervisors = []
     end
 
@@ -21,7 +21,7 @@ module Buildbox
 
       loop do
         @supervisors.each do |supervisor|
-          supervisor.actors.first.async.work
+          supervisor.actors.first.async.process
         end
 
         wait INTERVAL
