@@ -1,3 +1,5 @@
+require 'celluloid'
+
 module Buildbox
   class Server
     INTERVAL = 5
@@ -5,16 +7,22 @@ module Buildbox
     def initialize(config = Buildbox.config, logger = Buildbox.logger)
       @config = config
       @logger = logger
-      @agents = []
+      @supervisors = []
     end
 
     def start
+      Celluloid.logger = @logger
+
       agent_access_tokens.each do |access_token|
-        @agents << Buildbox::Agent.new(access_token)
+        @supervisors << Buildbox::Agent.supervise(access_token)
+
+        @logger.info "Agent with access token `#{access_token}` has started."
       end
 
       loop do
-        @agents.each { |agent| agent.async.work }
+        @supervisors.each do |supervisor|
+          supervisor.actors.first.async.work
+        end
 
         wait INTERVAL
       end

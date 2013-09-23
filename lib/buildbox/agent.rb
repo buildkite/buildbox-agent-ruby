@@ -13,11 +13,8 @@ module Buildbox
     def work
       running_builds = scheduled_builds.map do |build|
         Monitor.new(build, @api).async.monitor
-        Runner.new(build).future(:start)
+        Runner.new(build).async.start
       end
-
-      # wait for all the running builds to finish
-      running_builds.map(&:value)
     end
 
     private
