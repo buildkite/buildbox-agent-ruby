@@ -1,6 +1,4 @@
-require 'rubygems'
 require 'bundler/setup'
-
 require 'buildbox'
 
 SPEC_PATH     = Pathname.new(File.expand_path('..', __FILE__))
