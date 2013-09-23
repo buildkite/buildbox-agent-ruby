@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Buildbox::VERSION
   spec.authors       = ["Keith Pitt"]
   spec.email         = ["me@keithpitt.com"]
-  spec.description   = %q{Ruby client for buildbox}
-  spec.summary       = %q{Ruby client for buildbox}
-  spec.homepage      = ""
+  spec.description   = %q{Ruby agent for buildbox}
+  spec.summary       = %q{Ruby agent for buildbox}
+  spec.homepage      = "https://github.com/buildboxhq/buildbox-ruby"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
