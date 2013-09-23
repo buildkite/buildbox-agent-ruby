@@ -18,7 +18,7 @@ module Buildbox
       child_processes = process_map[@build.process.pid]
 
       # Stop the process
-      Buildbox.logger.info "Cancelling #{@build.id} with PID #{@build.process.pid}"
+      Buildbox.logger.info "Cancelling build #{@build.namespace}/#{@build.id} with PID #{@build.process.pid}"
       @build.process.stop
 
       begin
@@ -34,7 +34,7 @@ module Buildbox
 
     def kill_processes(processes)
       processes.each do |pid|
-        Buildbox.logger.info "Sending a TERM signal to child process with PID #{pid}"
+        Buildbox.logger.debug "Sending a TERM signal to child process with PID #{pid}"
 
         begin
           Process.kill("TERM", pid)
@@ -46,7 +46,7 @@ module Buildbox
               Process.wait
             end
           rescue Timeout::Error
-            Buildbox.logger.info "Sending a KILL signal to child process with PID #{pid}"
+            Buildbox.logger.debug "Sending a KILL signal to child process with PID #{pid}"
 
             Process.kill("KILL", pid)
           rescue Errno::ECHILD
