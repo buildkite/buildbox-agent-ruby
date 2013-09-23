@@ -119,7 +119,7 @@ describe Buildbox::Command do
         chunks << chunk
       end
 
-      chunks.should == ["test 0\r\n", "test 1\r\n", "test 2\r\n"]
+      chunks.map(&:chomp).reject(&:empty?).should == ["test 0", "test 1", "test 2"]
     end
   end
 end
