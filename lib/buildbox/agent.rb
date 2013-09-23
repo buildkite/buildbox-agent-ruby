@@ -19,10 +19,10 @@ module Buildbox
         @api.update_build(build, :agent_accepted => @access_token)
       end
 
-      # Then do some stuff...
+      # Run the builds one at a time
       builds.each do |build|
         Monitor.new(build, @api).async.monitor
-        Runner.new(build).async.start
+        Runner.new(build).start
       end
     end
 
