@@ -32,7 +32,7 @@ module Buildbox
     private
 
     def scheduled_builds
-      agent = @api.agent(@access_token, hostname)
+      agent = @api.agent(@access_token, :hostname => hostname, :version => Buildbox::VERSION)
       @api.scheduled_builds agent
     rescue Buildbox::API::AgentNotFoundError
       warn "Agent `#{@access_token}` does not exist"
