@@ -23,7 +23,8 @@ module Buildbox
     private
 
     def wait(interval)
-      @logger.info "Sleeping for #{interval} seconds"
+      @logger.debug "Sleeping for #{interval} seconds"
+
       sleep interval
     end
 

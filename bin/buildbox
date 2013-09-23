@@ -10,4 +10,9 @@ dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(dir) unless $LOAD_PATH.include?(dir)
 
 require 'buildbox'
+
+if ENV['DEBUG'] == 'true'
+  Buildbox.logger.level = Logger::DEBUG
+end
+
 Buildbox::CLI.new(ARGV).parse

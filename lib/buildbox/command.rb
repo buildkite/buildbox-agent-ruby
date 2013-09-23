@@ -39,9 +39,6 @@ module Buildbox
       # Get the timeout, if we have one
       timeout = @options[:timeout]
 
-      # Build the ChildProcess
-      @logger.info("Starting process: #{arguments}")
-
       # Set the directory for the process
       process.cwd = File.expand_path(@options[:directory] || Dir.pwd)
 
@@ -71,7 +68,7 @@ module Buildbox
       # Make sure the stdin does not buffer
       process.io.stdin.sync = true
 
-      @logger.info("Process started with PID: #{process.pid} and Group ID: #{Process.getpgid(process.pid)}")
+      @logger.debug("Process #{arguments} started with PID: #{process.pid} and Group ID: #{Process.getpgid(process.pid)}")
 
       if RUBY_PLATFORM != "java"
         # On Java, we have to close after. See down the method...

@@ -1,17 +1,24 @@
-require 'rubygems'
 require 'faraday'
 require 'faraday_middleware'
 require 'hashie/mash'
+require 'delegate'
 
 module Buildbox
   class API
+    class Logger < SimpleDelegator
+      def info(*args)
+        debug(*args)
+      end
+    end
+
     class AgentNotFoundError < Faraday::Error::ClientError; end
 
     RETRYABLE_EXCEPTIONS = [ 'Timeout::Error', 'Errno::EINVAL', 'Errno::ECONNRESET', 'EOFError', 'Net::HTTPBadResponse',
                              'Net::HTTPHeaderSyntaxError', 'Net::ProtocolError', 'Errno::EPIPE' ]
 
-    def initialize(config = Buildbox.config)
-      @config  = config
+    def initialize(config = Buildbox.config, logger = Buildbox.logger)
+      @config = config
+      @logger = logger
     end
 
     def authenticate(api_key)
@@ -47,7 +54,7 @@ module Buildbox
 
         faraday.request  :json
 
-        faraday.response :logger, Buildbox.logger
+        faraday.response :logger, Logger.new(@logger)
         faraday.response :mashify
 
         # JSON needs to come after mashify as it needs to run before the mashify

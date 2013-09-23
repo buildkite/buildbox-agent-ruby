@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'celluloid'
 require 'fileutils'
 
@@ -17,8 +16,6 @@ module Buildbox
       FileUtils.mkdir_p(directory_path)
       File.open(script_path, 'w+') { |file| file.write(@build.script) }
       File.chmod(0777, script_path)
-
-      info "Running script: #{script_path}"
 
       command = Command.new(script_path, :environment => @build.env, :directory => directory_path)
 
