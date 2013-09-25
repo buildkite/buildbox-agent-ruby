@@ -38,7 +38,7 @@ module Buildbox
     def agent(access_token, options)
       put("agents/#{access_token}", options)
     rescue Faraday::Error::ClientError => e
-      if e.response[:status] == 404
+      if e.response && e.response[:status] == 404
         raise AgentNotFoundError.new(e, e.response)
       else
         raise ServerError.new(e, e.response)
