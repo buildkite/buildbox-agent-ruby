@@ -18,7 +18,16 @@ module Buildbox
     end
 
     def api_endpoint
-      ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://agent.buildbox.io/v1"
+      endpoint = ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://agent.buildbox.io/v1"
+
+      # hack to update legacy endpoints
+      if endpoint == "https://api.buildbox.io/v1"
+        self.api_endpoint = "https://agent.buildbox.io/v1"
+        save
+        api_endpoint
+      else
+        endpoint
+      end
     end
 
     def update(attributes)
