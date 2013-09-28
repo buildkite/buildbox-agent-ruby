@@ -4,9 +4,10 @@ module Buildbox
   class Monitor
     include Celluloid
 
-    def initialize(build, api)
-      @build = build
-      @api   = api
+    def initialize(build, access_token, api)
+      @build        = build
+      @access_token = access_token
+      @api          = api
     end
 
     def monitor
@@ -17,10 +18,10 @@ module Buildbox
           # same finished_at timestamp throughout the entire method.
           finished_at = @build.finished_at
 
-          updated_build = @api.update_build(@build, :started_at  => @build.started_at,
-                                                    :finished_at => finished_at,
-                                                    :output      => @build.output,
-                                                    :exit_status => @build.exit_status)
+          updated_build = @api.update_build(@access_token, @build, :started_at  => @build.started_at,
+                                                                   :finished_at => finished_at,
+                                                                   :output      => @build.output,
+                                                                   :exit_status => @build.exit_status)
 
           if updated_build.state == 'canceled' && !@build.cancelling?
             Buildbox::Canceler.new(@build).async.cancel

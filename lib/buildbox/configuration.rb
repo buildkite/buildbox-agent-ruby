@@ -18,14 +18,7 @@ module Buildbox
     end
 
     def api_endpoint
-      ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://api.buildbox.io/v1"
-    end
-
-    def check
-      unless api_key
-        puts "No api_key set. You can set it with\nbuildbox auth:login [api_key]"
-        exit 1
-      end
+      ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://agent.buildbox.io/v1"
     end
 
     def update(attributes)

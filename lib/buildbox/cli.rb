@@ -9,11 +9,11 @@ module Buildbox
       @commands = {}
       @options  = {}
 
-      @commands['auth:login'] = OptionParser.new do |opts|
-        opts.banner = "Usage: buildbox auth:login"
+      @commands['agent:setup'] = OptionParser.new do |opts|
+        opts.banner = "Usage: buildbox agent:setup [token]"
 
         opts.on("--help", "You're looking at it.") do
-          puts @commands['auth:login']
+          puts @commands['agent:setup']
           exit
         end
       end
@@ -23,15 +23,6 @@ module Buildbox
 
         opts.on("--help", "You're looking at it.") do
           puts @commands['agent:start']
-          exit
-        end
-      end
-
-      @commands['agent:setup'] = OptionParser.new do |opts|
-        opts.banner = "Usage: buildbox agent:setup [token]"
-
-        opts.on("--help", "You're looking at it.") do
-          puts @commands['agent:setup']
           exit
         end
       end
@@ -74,24 +65,6 @@ module Buildbox
           puts "Successfully added agent access token"
           puts "You can now start the agent with: buildbox agent:start."
           puts "If the agent is already running, you'll have to restart it for the new changes to take effect"
-        elsif command == "auth:login"
-          if @argv.length == 0
-            puts "No api key provided"
-            exit 1
-          end
-
-          api_key = @argv.first
-
-          begin
-            Buildbox::API.new.authenticate(api_key)
-            Buildbox.config.update(:api_key => api_key)
-
-            puts "Successfully added your api_key"
-            puts "You can now add agents with: buildbox agent:setup [agent_token]"
-          rescue
-            puts "Could not authenticate your api_key"
-            exit 1
-          end
         end
       else
         puts global.help
@@ -112,7 +85,6 @@ module Buildbox
     def help
 <<HELP
 
-  auth:login  [api_key]      # login to buildbox
   agent:setup [access_token] # set the access token for the agent
   agent:start                # start the buildbox agent
   version  #  display version

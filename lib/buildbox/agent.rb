@@ -19,9 +19,9 @@ module Buildbox
 
         while build = @queue.pop do
           # Let the agent know that we're about to start running this build
-          @api.update_build(build, :agent_accepted => @access_token)
+          @api.update_build(@access_token, build, :agent_accepted => @access_token)
 
-          Monitor.new(build, @api).async.monitor
+          Monitor.new(build, @access_token, @api).async.monitor
           Runner.new(build).start
         end
 
@@ -32,8 +32,8 @@ module Buildbox
     private
 
     def scheduled_builds
-      agent = @api.agent(@access_token, :hostname => hostname, :version => Buildbox::VERSION)
-      @api.scheduled_builds agent
+      @api.agent(@access_token, :hostname => hostname, :version => Buildbox::VERSION)
+      @api.scheduled_builds(@access_token)
     rescue Buildbox::API::AgentNotFoundError
       warn "Agent `#{@access_token}` does not exist"
       [] # return empty array to avoid breakage

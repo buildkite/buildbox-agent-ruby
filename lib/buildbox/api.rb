@@ -12,6 +12,7 @@ module Buildbox
       def initialize(logger)
         @logger = logger
       end
+
       def info(*args)
         @logger.debug(*args)
       end
@@ -29,14 +30,8 @@ module Buildbox
       @logger = logger
     end
 
-    def authenticate(api_key)
-      @api_key = api_key
-
-      get("user")
-    end
-
     def agent(access_token, options)
-      put("agents/#{access_token}", options)
+      put(access_token, options)
     rescue Faraday::Error::ClientError => e
       if e.response && e.response[:status] == 404
         raise AgentNotFoundError.new(e, e.response)
@@ -45,19 +40,18 @@ module Buildbox
       end
     end
 
-    def scheduled_builds(agent)
-      get(agent.scheduled_builds_url).map { |build| Buildbox::Build.new(build) }
+    def scheduled_builds(access_token)
+      get("#{access_token}/builds/scheduled").map { |build| Buildbox::Build.new(build) }
     end
 
-    def update_build(build, options)
-      put(build.url, options)
+    def update_build(access_token, build, options)
+      put("#{access_token}/builds/#{build.id}", options)
     end
 
     private
 
     def connection
       @connection ||= Faraday.new(:url => @config.api_endpoint) do |faraday|
-        faraday.basic_auth @api_key || @config.api_key, ''
         faraday.request :retry
         faraday.request :json
 
