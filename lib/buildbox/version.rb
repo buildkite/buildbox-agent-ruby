@@ -1,3 +1,3 @@
 module Buildbox
-  VERSION = "0.3.9.1"
+  VERSION = "0.4"
 end
