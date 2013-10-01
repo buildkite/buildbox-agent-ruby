@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["me@keithpitt.com"]
   spec.description   = %q{Ruby agent for buildbox}
   spec.summary       = %q{Ruby agent for buildbox}
-  spec.homepage      = "https://github.com/buildboxhq/buildbox-ruby"
+  spec.homepage      = "https://github.com/buildboxhq/agent"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
