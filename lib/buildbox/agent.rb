@@ -13,9 +13,7 @@ module Buildbox
     def process
       return if @current_build
 
-      @current_build = @api.next_build(@access_token)
-
-      if @current_build
+      if @current_build = next_build
         @api.update_build(@access_token, @current_build, :agent_accepted => @access_token)
 
         Monitor.new(@current_build, @access_token, @api).async.monitor
@@ -27,9 +25,9 @@ module Buildbox
 
     private
 
-    def scheduled_builds
+    def next_build
       @api.agent(@access_token, :hostname => hostname, :version => Buildbox::VERSION)
-      @api.scheduled_builds(@access_token)
+      @api.next_build(@access_token)
     rescue Buildbox::API::AgentNotFoundError
       warn "Agent `#{@access_token}` does not exist"
       [] # return empty array to avoid breakage
