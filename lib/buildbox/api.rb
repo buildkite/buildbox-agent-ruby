@@ -40,8 +40,14 @@ module Buildbox
       end
     end
 
-    def scheduled_builds(access_token)
-      get("#{access_token}/builds/scheduled").map { |build| Buildbox::Build.new(build) }
+    def next_build(access_token)
+      build = get("#{access_token}/builds/queue/next").build
+
+      if build
+        Buildbox::Build.new(build)
+      else
+        nil
+      end
     end
 
     def update_build(access_token, build, options)

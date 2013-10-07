@@ -8,25 +8,21 @@ module Buildbox
     def initialize(access_token, api = Buildbox::API.new)
       @api          = api
       @access_token = access_token
-      @queue        = []
     end
 
     def process
-      unless @processing
-        @processing = true
+      return if @current_build
 
-        scheduled_builds.each { |build| @queue << build }
+      @current_build = @api.next_build(@access_token)
 
-        while build = @queue.pop do
-          # Let the agent know that we're about to start running this build
-          @api.update_build(@access_token, build, :agent_accepted => @access_token)
+      if @current_build
+        @api.update_build(@access_token, @current_build, :agent_accepted => @access_token)
 
-          Monitor.new(build, @access_token, @api).async.monitor
-          Runner.new(build).start
-        end
-
-        @processing = false
+        Monitor.new(@current_build, @access_token, @api).async.monitor
+        Runner.new(@current_build).start
       end
+
+      @current_build = nil
     end
 
     private
