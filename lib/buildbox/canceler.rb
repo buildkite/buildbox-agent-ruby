@@ -27,7 +27,7 @@ module Buildbox
         # Wow! That finished quickly...
       end
 
-      kill_processes(child_processes)
+      kill_processes(child_processes) if child_processes
     end
 
     private
