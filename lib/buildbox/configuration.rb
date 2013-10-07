@@ -13,10 +13,6 @@ module Buildbox
       end
     end
 
-    def api_key
-      ENV['BUILDBOX_API_KEY'] || self[:api_key]
-    end
-
     def api_endpoint
       endpoint = ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://agent.buildbox.io/v1"
 
