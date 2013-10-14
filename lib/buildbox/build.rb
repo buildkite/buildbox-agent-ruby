@@ -17,9 +17,5 @@ module Buildbox
     def finished?
       !finished_at.nil?
     end
-
-    def namespace
-      "#{project.team.id}/#{project.id}"
-    end
   end
 end
