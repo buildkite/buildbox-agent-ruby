@@ -1,5 +1,6 @@
 require 'celluloid'
 require 'fileutils'
+require 'childprocess'
 
 module Buildbox
   class Runner
@@ -42,7 +43,13 @@ module Buildbox
     end
 
     def script_path
-      @script_path ||= Buildbox.root_path.join("#{@build.namespace.gsub(/\//, '-')}-#{@build.id}.bat")
+      @script_path ||= Buildbox.root_path.join(script_name)
+    end
+
+    def script_name
+      name = "#{@build.namespace.gsub(/\//, '-')}-#{@build.id}"
+      name << ".bat" if ChildProcess.platform == :windows
+      name
     end
   end
 end

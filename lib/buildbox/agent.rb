@@ -30,7 +30,7 @@ module Buildbox
       @api.next_build(@access_token)
     rescue Buildbox::API::AgentNotFoundError
       warn "Agent `#{@access_token}` does not exist"
-      [] # return empty array to avoid breakage
+      nil
     end
 
     def hostname
