@@ -42,7 +42,7 @@ module Buildbox
     end
 
     def script_path
-      @script_path ||= Buildbox.root_path.join("buildbox-#{@build.namespace.gsub(/\//, '-')}-#{@build.id}")
+      @script_path ||= Buildbox.root_path.join("#{@build.namespace.gsub(/\//, '-')}-#{@build.id}.bat")
     end
   end
 end

@@ -1,8 +1,12 @@
 require 'childprocess'
-require 'pty'
 
 # Inspiration from:
 # https://github.com/mitchellh/vagrant/blob/master/lib/vagrant/util/subprocess.rb
+
+begin
+  require 'pty' # PTY isn't available on Windows
+rescue LoadError
+end
 
 module Buildbox
   class Command
@@ -68,7 +72,7 @@ module Buildbox
       # Make sure the stdin does not buffer
       process.io.stdin.sync = true
 
-      @logger.debug("Process #{arguments} started with PID: #{process.pid} and Group ID: #{Process.getpgid(process.pid)}")
+      @logger.debug("Process #{arguments} started with PID: #{process.pid}")
 
       if RUBY_PLATFORM != "java"
         # On Java, we have to close after. See down the method...

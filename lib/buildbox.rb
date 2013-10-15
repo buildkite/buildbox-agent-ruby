@@ -30,7 +30,7 @@ module Buildbox
   end
 
   def self.root_path
-    path = Pathname.new File.join(ENV['HOME'], ".buildbox")
+    path = Pathname.new File.join(Dir.home, ".buildbox")
     path.mkpath unless path.exist?
 
     Pathname.new(path)
