@@ -12,20 +12,20 @@ module Buildbox
     def cancel
       @build.cancel_started = true
 
-      # Store all the child processes before we stop so we can reap them after.
-      # A new process may start up between this and the process stopping,
-      # but that should be OK for now.
-      child_processes = process_map[@build.process.pid]
+      # Zombie child process killing is not currently supported on Windows.
+      unless ChildProcess.platform == :windows
+        # Store all the child processes before we stop so we can reap them after.
+        # A new process may start up between this and the process stopping,
+        # but that should be OK for now.
+        child_processes = process_map[@build.process.pid]
+      end
 
       # Stop the process
       Buildbox.logger.info "Cancelling build #{@build.namespace}/#{@build.id} with PID #{@build.process.pid}"
       @build.process.stop
 
-      begin
-        @build.process.wait
-      rescue Errno::ECHILD
-        # Wow! That finished quickly...
-      end
+      # If it hasn't stopped yet, wait until it has.
+      sleep 1 until @build.exited?
 
       kill_processes(child_processes) if child_processes
     end
