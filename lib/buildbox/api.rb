@@ -41,9 +41,9 @@ module Buildbox
     end
 
     def next_build(access_token)
-      build = get("#{access_token}/builds/queue/next").build
+      response = get("#{access_token}/builds/queue/next")
 
-      if build
+      if build = response.build
         Buildbox::Build.new(build)
       else
         nil
