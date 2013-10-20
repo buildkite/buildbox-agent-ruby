@@ -57,7 +57,8 @@ module Buildbox
     private
 
     def connection
-      @connection ||= Faraday.new(:url => @config.api_endpoint) do |faraday|
+      @connection ||= Faraday.new(:url => @config.api_endpoint,
+                                  :ssl => { :ca_file => Buildbox.gem_path.join("lib", "certs", "cacert.pem").to_s }) do |faraday|
         faraday.request :retry
         faraday.request :json
 

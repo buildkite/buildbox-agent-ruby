@@ -54,7 +54,7 @@ module Buildbox
     end
 
     def path
-      Buildbox.root_path.join("configuration.json")
+      Buildbox.home_path.join("configuration.json")
     end
   end
 end

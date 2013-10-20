@@ -39,11 +39,11 @@ module Buildbox
     private
 
     def directory_path
-      @directory_path ||= Buildbox.root_path.join(@build.namespace)
+      @directory_path ||= Buildbox.home_path.join(@build.namespace)
     end
 
     def script_path
-      @script_path ||= Buildbox.root_path.join(script_name)
+      @script_path ||= Buildbox.home_path.join(script_name)
     end
 
     def script_name

@@ -25,7 +25,7 @@ SCRIPT
   end
 
   before do
-    Buildbox.stub(:root_path).and_return(TEMP_PATH)
+    Buildbox.stub(:home_path).and_return(TEMP_PATH)
   end
 
   after do
