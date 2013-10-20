@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    buildbox (0.4.2)
+    buildbox (0.5)
       celluloid (~> 0.14)
       childprocess (~> 0.3)
       faraday (~> 0.8)
@@ -25,7 +25,6 @@ GEM
     faraday_middleware (0.9.0)
       faraday (>= 0.7.4, < 0.9)
     ffi (1.9.0)
-    ffi (1.9.0-x86-mingw32)
     hashie (2.0.5)
     multi_json (1.8.2)
     multipart-post (1.2.0)
