@@ -54,6 +54,14 @@ module Buildbox
       put("#{access_token}/builds/#{build.id}", options)
     end
 
+    def create_artifact(access_token, build, options)
+      post("#{access_token}/builds/#{build.id}/artifacts", options)
+    end
+
+    def update_artifact(access_token, build, artifact_id, options)
+      put("#{access_token}/builds/#{build.id}/artifacts/#{artifact_id}", options)
+    end
+
     private
 
     def connection

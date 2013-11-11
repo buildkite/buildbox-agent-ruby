@@ -7,18 +7,28 @@ module Buildbox
     include Celluloid
     include Celluloid::Logger
 
+    def self.start(build)
+      runner = new(build)
+      runner.start
+      runner
+    end
+
     def initialize(build)
       @build = build
+    end
+
+    def build_directory
+      @build_directory ||= Buildbox.home_path.join(@build.namespace)
     end
 
     def start
       info "Starting to build #{@build.namespace}/#{@build.id} starting..."
 
-      FileUtils.mkdir_p(directory_path)
+      FileUtils.mkdir_p(build_directory)
       File.open(script_path, 'w+') { |file| file.write(@build.script) }
       File.chmod(0777, script_path)
 
-      command = Command.new(script_path, :environment => @build.env, :directory => directory_path)
+      command = Command.new(script_path, :environment => @build.env, :directory => build_directory)
 
       @build.output     = ""
       @build.process    = command.process
@@ -37,10 +47,6 @@ module Buildbox
     end
 
     private
-
-    def directory_path
-      @directory_path ||= Buildbox.home_path.join(@build.namespace)
-    end
 
     def script_path
       @script_path ||= Buildbox.home_path.join(script_name)
