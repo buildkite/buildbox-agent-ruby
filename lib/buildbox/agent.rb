@@ -6,8 +6,9 @@ module Buildbox
     include Celluloid::Logger
 
     def initialize(access_token, api = Buildbox::API.new)
-      @api          = api
-      @access_token = access_token
+      @api           = api
+      @access_token  = access_token
+      @uploader_pool = Uploader.pool(size: 10) # upload 10 things at a time
     end
 
     def process
@@ -23,7 +24,10 @@ module Buildbox
           files = Artifact.files_to_upload(runner.build_directory, glob)
 
           files.each_pair do |relative_path, absolute_path|
-            Uploader.new(absolute_path, relative_path, @api).async.upload
+            credentials = @api.create_artifact(@access_token, @current_build, path: relative_path,
+                                                                              file_size: File.size(absolute_path))
+
+            @uploader_pool.upload(credentials, absolute_path)
           end
         end
       end

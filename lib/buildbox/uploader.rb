@@ -5,14 +5,8 @@ module Buildbox
     include Celluloid
     include Celluloid::Logger
 
-    def initialize(file, remote_path, api)
-      @file        = file
-      @remote_path = remote_path
-      @api         = api
-    end
-
-    def upload
-      info "Uploading #{@file} to #{@remote_path}"
+    def upload(credentials, absolute_path)
+      info "Uploading #{absolute_path} with #{credentials}"
     end
   end
 end
