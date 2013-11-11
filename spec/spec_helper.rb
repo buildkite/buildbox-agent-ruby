@@ -1,4 +1,8 @@
 require 'bundler/setup'
+
+require 'simplecov'
+SimpleCov.start { add_filter('/spec/') }
+
 require 'buildbox'
 
 SPEC_PATH     = Pathname.new(File.expand_path('..', __FILE__))

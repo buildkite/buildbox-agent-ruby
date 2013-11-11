@@ -21,12 +21,14 @@ GEM
     crack (0.4.1)
       safe_yaml (~> 0.9.0)
     diff-lcs (1.2.5)
+    docile (1.1.0)
     faraday (0.8.8)
       multipart-post (~> 1.2.0)
     faraday_middleware (0.9.0)
       faraday (>= 0.7.4, < 0.9)
     ffi (1.9.3)
     hashie (2.0.5)
+    lockfile (2.1.0)
     mime-types (2.0)
     multi_json (1.8.2)
     multipart-post (1.2.0)
@@ -40,6 +42,12 @@ GEM
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.4)
     safe_yaml (0.9.7)
+    simplecov (0.8.1)
+      docile (~> 1.1.0)
+      lockfile (>= 2.1.0)
+      multi_json
+      simplecov-html (~> 0.8.0)
+    simplecov-html (0.8.0)
     timers (1.1.0)
     webmock (1.15.0)
       addressable (>= 2.2.7)
@@ -53,4 +61,5 @@ DEPENDENCIES
   buildbox!
   rake
   rspec
+  simplecov
   webmock
