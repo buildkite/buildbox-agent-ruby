@@ -3,6 +3,7 @@ require 'logger'
 
 module Buildbox
   autoload :API,           "buildbox/api"
+  autoload :Artifact,      "buildbox/artifact"
   autoload :Build,         "buildbox/build"
   autoload :Command,       "buildbox/command"
   autoload :Canceler,      "buildbox/canceler"
@@ -15,6 +16,7 @@ module Buildbox
   autoload :Server,        "buildbox/server"
   autoload :UTF8,          "buildbox/utf8"
   autoload :Agent,         "buildbox/agent"
+  autoload :Uploader,      "buildbox/uploader"
   autoload :VERSION,       "buildbox/version"
 
   def self.config

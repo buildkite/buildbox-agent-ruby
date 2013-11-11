@@ -16,8 +16,16 @@ module Buildbox
       if @current_build = next_build
         @api.update_build(@access_token, @current_build, :agent_accepted => @access_token)
 
-        Monitor.new(@current_build, @access_token, @api).async.monitor
-        Runner.new(@current_build).start
+        montior = Monitor.new(@current_build, @access_token, @api).async.monitor
+        runner  = Runner.start(@current_build)
+
+        @current_build.artifact_paths.each do |glob|
+          files = Artifact.files_to_upload(runner.build_directory, glob)
+
+          files.each_pair do |relative_path, absolute_path|
+            Uploader.new(absolute_path, relative_path, @api).async.upload
+          end
+        end
       end
 
       @current_build = nil
