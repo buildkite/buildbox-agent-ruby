@@ -37,8 +37,10 @@ module Buildbox
         relative_path = relativize_to_dir(file, expanded_directory)
         copy_to       = File.join(dir, relative_path)
 
-        FileUtils.mkdir_p(File.dirname(copy_to))
-        FileUtils.cp(file, copy_to)
+        if File.file?(file)
+          FileUtils.mkdir_p(File.dirname(copy_to))
+          FileUtils.cp(file, copy_to)
+        end
       end
 
       # Grab all the files we're going to upload.

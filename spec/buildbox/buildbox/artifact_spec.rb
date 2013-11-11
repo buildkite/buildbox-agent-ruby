@@ -31,5 +31,12 @@ describe Buildbox::Artifact do
       expect(files.length).to eql(5)
       test_for_files(files, %w(/foo.txt /bar/bang.txt /bar/bang1.txt /bar/bang2.txt /bar/inside-bar/bang3.txt))
     end
+
+    it "handles specifying everything under a folder" do
+      files = Buildbox::Artifact.files_to_upload(directory, "coverage/**/*")
+
+      expect(files.length).to eql(25)
+      test_for_files(files, %w(/coverage/index.html /coverage/assets/0.8.0/application.js))
+    end
   end
 end
