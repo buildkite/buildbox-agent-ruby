@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'multi_json',         '~> 1.7'
   spec.add_dependency 'celluloid',          '~> 0.14'
   spec.add_dependency 'childprocess',       '~> 0.3'
-  spec.add_dependency 'fog',                '>= 1.8.0'
+  spec.add_dependency 'mime-types',         '~> 2.0'
 
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'

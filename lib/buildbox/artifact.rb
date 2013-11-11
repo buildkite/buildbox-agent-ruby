@@ -23,15 +23,6 @@ module Buildbox
       end
 
       path_to_absolute
-    rescue => e
-      error "There was an error when preparing the artifacts for path: #{@glob} (#{e.class.name}: #{e.message})"
-      e.backtrace[0..3].each { |line| error line }
-
-      # cleanup the directory if something failed.
-      FileUtils.remove_entry_secure(tmpdir) if Dir.exist?(tmpdir)
-
-      # return an empty hash if it broke
-      {}
     end
 
     private
