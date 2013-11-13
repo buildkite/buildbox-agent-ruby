@@ -30,7 +30,7 @@ module Buildbox
         copy_to_path  = File.join(tmpdir, file)
 
         if File.file?(absolute_path)
-          artifacts << Artifact.create(file, copy_to_path)
+          artifacts << Artifact.create(@glob, file, copy_to_path, absolute_path)
 
           FileUtils.mkdir_p(File.dirname(copy_to_path))
           FileUtils.cp(absolute_path, copy_to_path)

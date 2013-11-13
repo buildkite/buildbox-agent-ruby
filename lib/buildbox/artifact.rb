@@ -9,14 +9,16 @@ module Buildbox
     attr_reader :id, :name, :path
     attr_accessor :remote_id, :upload_instructions
 
-    def self.create(name, path)
-      new(SecureRandom.uuid, name, path)
+    def self.create(glob_path, name, path, original_path)
+      new(SecureRandom.uuid, glob_path, name, path, original_path)
     end
 
-    def initialize(id, name, path)
-      @id   = id
-      @name = name
-      @path = path
+    def initialize(id, glob_path, name, path, original_path)
+      @id            = id
+      @glob_path     = glob_path
+      @name          = name
+      @path          = path
+      @original_path = original_path
     end
 
     def basename
@@ -24,7 +26,12 @@ module Buildbox
     end
 
     def as_json
-      { :id => @id, :name => @name, :path => @path, :file_size => File.size(@path) }
+      { :id            => @id,
+        :glob_path     => @glob_path,
+        :name          => @name,
+        :path          => @path,
+        :original_path => @original_path,
+        :file_size     => File.size(@path) }
     end
   end
 end
