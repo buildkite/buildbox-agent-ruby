@@ -42,13 +42,12 @@ module Buildbox
     end
 
     def upload_artifacts_from(build_directory, artifact_path)
-      files = Artifact.files_to_upload(build_directory, artifact_path)
+      artifacts = Artifact::Collector.collect_and_copy(build_directory, artifact_path)
 
-      files.each_pair do |relative_path, absolute_path|
-        Celluloid::Actor[:uploader_pool].async.upload(@api, @access_token, @current_build, relative_path, absolute_path)
-      end
+      Artifact::Uploader.new(@api, @access_token, @current_build, artifacts).async.prepare_and_upload
     rescue => e
       error "There was an error uploading artifacts for path: #{artifact_path} (#{e.class.name}: #{e.message})"
+
       e.backtrace[0..3].each { |line| error(line) }
     end
   end

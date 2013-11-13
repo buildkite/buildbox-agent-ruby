@@ -16,7 +16,6 @@ module Buildbox
   autoload :Server,        "buildbox/server"
   autoload :UTF8,          "buildbox/utf8"
   autoload :Agent,         "buildbox/agent"
-  autoload :Uploader,      "buildbox/uploader"
   autoload :VERSION,       "buildbox/version"
 
   def self.config

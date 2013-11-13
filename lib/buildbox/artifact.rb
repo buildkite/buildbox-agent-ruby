@@ -1,54 +1,30 @@
-require 'fileutils'
-require 'tempfile'
+require 'securerandom'
 
 module Buildbox
   class Artifact
-    include Celluloid::Logger
+    autoload :Poster,    "buildbox/artifact/poster"
+    autoload :Collector, "buildbox/artifact/collector"
+    autoload :Uploader,  "buildbox/artifact/uploader"
 
-    def self.files_to_upload(build_directory, glob)
-      new(build_directory, glob).files_to_upload
+    attr_reader :id, :name, :path
+    attr_accessor :remote_id, :upload_instructions
+
+    def self.create(name, path)
+      new(SecureRandom.uuid, name, path)
     end
 
-    def initialize(build_directory, glob)
-      @build_directory = build_directory
-      @glob            = glob
+    def initialize(id, name, path)
+      @id   = id
+      @name = name
+      @path = path
     end
 
-    def files_to_upload
-      tmpdir       = Dir.mktmpdir
-      file_hash    = {}
-
-      globbed_files.each do |file|
-        absolute_path = File.expand_path(file, @build_directory)
-        copy_to_path  = File.join(tmpdir, file)
-
-        if File.file?(absolute_path)
-          file_hash[file] = copy_to_path
-
-          FileUtils.mkdir_p(File.dirname(copy_to_path))
-          FileUtils.cp(absolute_path, copy_to_path)
-        end
-      end
-
-      file_hash
+    def basename
+      File.basename(@path)
     end
 
-    private
-
-    def glob_path
-      Pathname.new(@glob)
-    end
-
-    def build_directory_path
-      Pathname.new(@build_directory)
-    end
-
-    def globbed_files
-      if glob_path.relative?
-        Dir.chdir(build_directory_path.expand_path) { Dir.glob(glob_path) }
-      else
-        Dir.glob(glob_path)
-      end
+    def as_json
+      { :id => @id, :name => @name, :path => @path, :file_size => File.size(@path) }
     end
   end
 end

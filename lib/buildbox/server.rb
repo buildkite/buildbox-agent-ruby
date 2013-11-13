@@ -12,7 +12,7 @@ module Buildbox
 
     def start
       Celluloid.logger = @logger
-      Celluloid::Actor[:uploader_pool] = Uploader.pool
+      Celluloid::Actor[:artifact_poster_pool] = Artifact::Poster.pool
 
       agent_access_tokens.each do |access_token|
         @supervisors << Buildbox::Agent.supervise(access_token)

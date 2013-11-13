@@ -54,8 +54,8 @@ module Buildbox
       put("#{access_token}/builds/#{build.id}", options)
     end
 
-    def create_artifact(access_token, build, options)
-      post("#{access_token}/builds/#{build.id}/artifacts", options)
+    def create_artifacts(access_token, build, artifacts)
+      post("#{access_token}/builds/#{build.id}/artifacts", :artifacts => artifacts.map(&:as_json))
     end
 
     def update_artifact(access_token, build, artifact_id, options)
