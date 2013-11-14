@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    buildbox (0.6.rc1)
+    buildbox (0.6)
       celluloid (~> 0.14)
       childprocess (~> 0.3)
       faraday (~> 0.8)
