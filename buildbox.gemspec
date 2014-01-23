@@ -18,11 +18,13 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'faraday',      '~> 0.9'
-  spec.add_dependency 'multi_json',   '~> 1.8'
-  spec.add_dependency 'celluloid',    '~> 0.15'
-  spec.add_dependency 'childprocess', '~> 0.3'
-  spec.add_dependency 'mime-types',   '~> 2.0'
+  spec.add_dependency 'faraday',            '0.8.9'
+  spec.add_dependency 'faraday_middleware', '0.9'
+
+  spec.add_dependency 'multi_json',         '~> 1.8'
+  spec.add_dependency 'celluloid',          '~> 0.15'
+  spec.add_dependency 'childprocess',       '~> 0.3'
+  spec.add_dependency 'mime-types',         '~> 2.0'
 
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'

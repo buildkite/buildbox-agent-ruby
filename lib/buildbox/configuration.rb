@@ -2,18 +2,20 @@ require 'json'
 
 module Buildbox
   class Configuration
+    include Buildbox::Model
+
     def agent_access_tokens
       env_agents = ENV['BUILDBOX_AGENTS']
 
       if env_agents.nil?
-        self[:agent_access_tokens] || []
+        @agent_access_tokens || []
       else
         env_agents.to_s.split(",")
       end
     end
 
     def api_endpoint
-      endpoint = ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://agent.buildbox.io/v1"
+      endpoint = ENV['BUILDBOX_API_ENDPOINT'] || @api_endpoint || "https://agent.buildbox.io/v1"
 
       # hack to update legacy endpoints
       if endpoint == "https://api.buildbox.io/v1"
@@ -26,7 +28,8 @@ module Buildbox
     end
 
     def update(attributes)
-      attributes.each_pair { |key, value| self[key] = value }
+      self.attributes = attributes
+
       save
     end
 
@@ -49,7 +52,7 @@ module Buildbox
     end
 
     def read_and_load
-      merge! JSON.parse(path.read)
+      self.attributes = JSON.parse(path.read)
     end
 
     def path
