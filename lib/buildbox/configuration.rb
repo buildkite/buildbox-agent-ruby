@@ -1,8 +1,7 @@
-require 'hashie/mash'
 require 'json'
 
 module Buildbox
-  class Configuration < Hashie::Mash
+  class Configuration
     def agent_access_tokens
       env_agents = ENV['BUILDBOX_AGENTS']
 

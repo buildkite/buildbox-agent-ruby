@@ -26,9 +26,9 @@ module Buildbox
     end
 
     def initialize(*args)
-      @options   = args.last.is_a?(Hash) ? args.pop : {}
+      @options = args.last.is_a?(Hash) ? args.pop : {}
       @arguments = args.dup
-      @logger    = Buildbox.logger
+      @logger = Buildbox.logger
     end
 
     def arguments
@@ -55,9 +55,12 @@ module Buildbox
                                 IO.pipe
                               end
 
-      process.io.stdout     = write_pipe
-      process.io.stderr     = write_pipe
-      process.duplex        = true
+      # p read_pipe.ready?
+      # sleep 2
+
+      process.io.stdout = write_pipe
+      process.io.stderr = write_pipe
+      process.duplex = true
 
       # Set the environment on the process
       if @options[:environment]
@@ -94,15 +97,12 @@ module Buildbox
 
         # Check if we have exceeded our timeout
         raise TimeoutExceeded if timeout && (Time.now.to_i - start_time) > timeout
-        # Kill the process and wait a bit for it to disappear
-        # Process.kill('KILL', process.pid)
-        # Process.waitpid2(process.pid)
 
         # Check the readers to see if they're ready
         if readers && !readers.empty?
           readers.each do |r|
             # Read from the IO object
-            data = read_io(r)
+            data = read_until_block(r)
 
             # We don't need to do anything if the data is empty
             next if data.empty?
@@ -136,7 +136,7 @@ module Buildbox
       # process exited.
 
       # Read the extra data
-      extra_data = read_io(read_pipe)
+      extra_data = read_until_block(read_pipe)
 
       # If there's some that we missed
       if extra_data != ""
@@ -150,7 +150,7 @@ module Buildbox
         write_pipe.close
       end
 
-      @output      = output.chomp
+      @output = output.chomp
       @exit_status = process.exit_code
     end
 
@@ -161,7 +161,7 @@ module Buildbox
     # data.
     #
     # @return [String]
-    def read_io(io)
+    def read_until_block(io)
       data = ""
 
       while true
@@ -175,7 +175,7 @@ module Buildbox
             # We have to do this since `readpartial` will actually block
             # until data is available, which can cause blocking forever
             # in some cases.
-            results = IO.select([io], nil, nil, 0.1)
+            results = ::IO.select([io], nil, nil, 0.1)
             break if !results || results[0].empty?
 
             # Read!
@@ -189,19 +189,17 @@ module Buildbox
           # since we use some Ruby 1.9 specific exceptions.
 
           breakable = false
-
-          # EOFError from OSX, EIO is raised by ubuntu
-          if e.is_a?(EOFError) || e.is_a?(Errno::EIO)
+          if e.is_a?(EOFError)
             # An `EOFError` means this IO object is done!
             breakable = true
-          elsif defined?(IO::WaitReadable) && e.is_a?(IO::WaitReadable)
+          elsif defined?(::IO::WaitReadable) && e.is_a?(::IO::WaitReadable)
             # IO::WaitReadable is only available on Ruby 1.9+
 
             # An IO::WaitReadable means there may be more IO but this
             # IO object is not ready to be read from yet. No problem,
             # we read as much as we can, so we break.
             breakable = true
-          elsif e.is_a?(Errno::EAGAIN) || e.is_a?(Errno::EWOULDBLOCK)
+          elsif e.is_a?(Errno::EAGAIN)
             # Otherwise, we just look for the EAGAIN error which should be
             # all that IO::WaitReadable does in Ruby 1.9.
             breakable = true

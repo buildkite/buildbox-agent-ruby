@@ -1,6 +1,4 @@
 require 'faraday'
-require 'faraday_middleware'
-require 'hashie/mash'
 require 'delegate'
 
 module Buildbox

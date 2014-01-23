@@ -10,6 +10,7 @@ module Buildbox
   autoload :CLI,           "buildbox/cli"
   autoload :Configuration, "buildbox/configuration"
   autoload :Monitor,       "buildbox/monitor"
+  autoload :Model,         "buildbox/model"
   autoload :Platform,      "buildbox/platform"
   autoload :Runner,        "buildbox/runner"
   autoload :Script,        "buildbox/script"
