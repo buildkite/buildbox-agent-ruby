@@ -66,11 +66,16 @@ module Buildbox
         end
       end
 
+      # Record the start time for timeout purposes
+      start_time = Time.now.to_i
+
+      # Track the output as it goes
+      output = ""
+
       # Start the process
       process.start
 
-      # Record the start time for timeout purposes
-      start_time = Time.now.to_i
+      @logger.debug("Process #{arguments} started with PID: #{process.pid}")
 
       # Make sure the stdin does not buffer
       process.io.stdin.sync = true
@@ -82,12 +87,6 @@ module Buildbox
         write_pipe.close
       end
 
-      @logger.debug("Process #{arguments} started with PID: #{process.pid}")
-
-      # Track the output as it goes
-      output = ""
-
-      @logger.debug("Selecting on IO")
       while true
         results = IO.select([read_pipe], nil, nil, timeout || 0.1) || []
         readers = results[0]
