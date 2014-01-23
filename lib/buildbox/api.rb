@@ -42,7 +42,7 @@ module Buildbox
     def next_build(access_token)
       response = get("#{access_token}/builds/queue/next")
 
-      if build = response.build
+      if build = response['build']
         Buildbox::Build.new(build)
       else
         nil
@@ -70,10 +70,7 @@ module Buildbox
         faraday.request :json
 
         faraday.response :logger, ProxyLogger.new(@logger)
-        faraday.response :mashify
 
-        # JSON needs to come after mashify as it needs to run before the mashify
-        # middleware.
         faraday.response :json
         faraday.response :raise_error
 

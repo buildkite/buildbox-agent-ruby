@@ -23,7 +23,7 @@ module Buildbox
                                                                    :output      => @build.output,
                                                                    :exit_status => @build.exit_status)
 
-          if updated_build.state == 'canceled' && !@build.cancelling?
+          if updated_build['state'] == 'canceled' && !@build.cancelling?
             Buildbox::Canceler.new(@build).async.cancel
           end
 
