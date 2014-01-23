@@ -48,7 +48,8 @@ module Buildbox
     private
 
     def pretty_json
-      JSON.pretty_generate(self)
+      JSON.pretty_generate(:agent_access_tokens => agent_access_tokens,
+                           :api_endpoint => api_endpoint)
     end
 
     def read_and_load
