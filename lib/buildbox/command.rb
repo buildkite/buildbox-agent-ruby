@@ -55,9 +55,6 @@ module Buildbox
                                 IO.pipe
                               end
 
-      # p read_pipe.ready?
-      # sleep 2
-
       process.io.stdout = write_pipe
       process.io.stderr = write_pipe
       process.duplex = true
@@ -72,10 +69,11 @@ module Buildbox
       # Start the process
       process.start
 
+      # Record the start time for timeout purposes
+      start_time = Time.now.to_i
+
       # Make sure the stdin does not buffer
       process.io.stdin.sync = true
-
-      @logger.debug("Process #{arguments} started with PID: #{process.pid}")
 
       if RUBY_PLATFORM != "java"
         # On Java, we have to close after. See down the method...
@@ -84,8 +82,7 @@ module Buildbox
         write_pipe.close
       end
 
-      # Record the start time for timeout purposes
-      start_time = Time.now.to_i
+      @logger.debug("Process #{arguments} started with PID: #{process.pid}")
 
       # Track the output as it goes
       output = ""
