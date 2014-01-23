@@ -171,7 +171,7 @@ module Buildbox
             # We have to do this since `readpartial` will actually block
             # until data is available, which can cause blocking forever
             # in some cases.
-            results = ::IO.select([io], nil, nil, 0.1)
+            results = IO.select([io], nil, nil, 0.1)
             break if !results || results[0].empty?
 
             # Read!
@@ -185,17 +185,19 @@ module Buildbox
           # since we use some Ruby 1.9 specific exceptions.
 
           breakable = false
-          if e.is_a?(EOFError)
+
+          # EOFError from OSX, EIO is raised by ubuntu
+          if e.is_a?(EOFError) || e.is_a?(Errno::EIO)
             # An `EOFError` means this IO object is done!
             breakable = true
-          elsif defined?(::IO::WaitReadable) && e.is_a?(::IO::WaitReadable)
+          elsif defined?(IO::WaitReadable) && e.is_a?(IO::WaitReadable)
             # IO::WaitReadable is only available on Ruby 1.9+
 
             # An IO::WaitReadable means there may be more IO but this
             # IO object is not ready to be read from yet. No problem,
             # we read as much as we can, so we break.
             breakable = true
-          elsif e.is_a?(Errno::EAGAIN)
+          elsif e.is_a?(Errno::EAGAIN) || e.is_a?(Errno::EWOULDBLOCK)
             # Otherwise, we just look for the EAGAIN error which should be
             # all that IO::WaitReadable does in Ruby 1.9.
             breakable = true
