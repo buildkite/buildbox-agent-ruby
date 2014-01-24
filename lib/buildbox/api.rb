@@ -1,7 +1,3 @@
-require 'faraday'
-require 'faraday_middleware'
-require 'delegate'
-
 module Buildbox
   class API
     class AgentNotFoundError < StandardError; end
@@ -32,7 +28,7 @@ module Buildbox
     end
 
     def create_artifacts(access_token, build, artifacts)
-      connection.request(:post, "#{access_token}/builds/#{build.id}/artifacts", 'artifacts' => artifacts.map(&:as_json))
+      connection.request(:post, "#{access_token}/builds/#{build.id}/artifacts", :artifacts => artifacts.map(&:as_json))
     end
 
     def update_artifact(access_token, build, artifact_id, options)

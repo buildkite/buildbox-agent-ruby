@@ -72,19 +72,17 @@ module Buildbox
     end
 
     def http
-      @http ||= begin
-                  http = Net::HTTP.new(@endpoint.host, @endpoint.port)
-                  http.open_timeout = 64
-                  http.read_timeout = 64
+      http = Net::HTTP.new(@endpoint.host, @endpoint.port)
+      http.open_timeout = 64
+      http.read_timeout = 64
 
-                  if @endpoint.scheme == "https"
-                    http.use_ssl = true
-                    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-                  end
+      if @endpoint.scheme == "https"
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      end
 
-                  http.ca_file = @ca_file
-                  http
-                end
+      http.ca_file = @ca_file
+      http
     end
   end
 end
