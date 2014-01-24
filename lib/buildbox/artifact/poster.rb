@@ -1,5 +1,4 @@
 require 'celluloid'
-require 'mime/types'
 
 module Buildbox
   class Artifact::Poster
