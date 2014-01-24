@@ -6,6 +6,7 @@ module Buildbox
   autoload :Artifact,      "buildbox/artifact"
   autoload :Build,         "buildbox/build"
   autoload :Command,       "buildbox/command"
+  autoload :Connection,    "buildbox/connection"
   autoload :Canceler,      "buildbox/canceler"
   autoload :CLI,           "buildbox/cli"
   autoload :Configuration, "buildbox/configuration"

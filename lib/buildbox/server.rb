@@ -21,22 +21,14 @@ module Buildbox
         @logger.info "Agent with access token `#{access_token}` has started."
       end
 
-      before = ObjectSpace.count_objects
-
       loop do
-        x = allocate_count(before) do
-          @supervisors.each do |supervisor|
-            supervisor.actors.first.async.process
-          end
-
-          # https://github.com/ruby-prof/ruby-prof
-
-          GC.start
-
-          wait INTERVAL
+        @supervisors.each do |supervisor|
+          supervisor.actors.first.async.process
         end
 
-        p x
+        GC.start
+
+        wait INTERVAL
       end
     end
 
@@ -50,15 +42,6 @@ module Buildbox
 
     def agent_access_tokens
       @config.agent_access_tokens
-    end
-
-    def allocate_count(before, &block)
-      GC.disable
-      yield
-      after = ObjectSpace.count_objects
-      after.each { |k,v| after[k] = v - before[k] }
-      GC.enable
-      after
     end
   end
 end
