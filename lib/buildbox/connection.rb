@@ -20,7 +20,7 @@ module Buildbox
       attempts = 3
 
       begin
-        @logger.info "#{method} #{path}"
+        @logger.debug "#{method} #{path}"
 
         response = case method
                    when :get
