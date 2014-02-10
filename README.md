@@ -28,4 +28,4 @@ For more help with the command line interface
 
 ## Copyright
 
-Copyright (c) 2013 Keith Pitt. See LICENSE for details.
+Copyright (c) 2014 Keith Pitt. See LICENSE for details.
