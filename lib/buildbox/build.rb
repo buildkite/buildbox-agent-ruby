@@ -1,11 +1,7 @@
+require 'hashie/mash'
+
 module Buildbox
-  class Build
-    include Buildbox::Model
-
-    attr_accessor :id, :script, :env, :namespace,
-      :started_at, :output, :exit_status, :finished_at,
-      :process, :artifact_paths
-
+  class Build < Hashie::Mash
     def success?
       exit_status == 0
     end

@@ -7,10 +7,10 @@ module Buildbox
     include Celluloid::Logger
 
     def initialize(api, access_token, build, artifacts)
-      @api = api
+      @api          = api
       @access_token = access_token
-      @build = build
-      @artifacts = artifacts
+      @build        = build
+      @artifacts    = artifacts
     end
 
     def prepare_and_upload
@@ -20,7 +20,7 @@ module Buildbox
       responses.each do |response|
         artifact = @artifacts.find { |artifact| artifact.id == response['id'] }
 
-        artifact.remote_id = response['artifact']['id']
+        artifact.remote_id           = response['artifact']['id']
         artifact.upload_instructions = response['artifact']['uploader']
       end
 

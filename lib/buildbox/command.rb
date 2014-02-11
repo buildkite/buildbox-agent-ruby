@@ -26,9 +26,9 @@ module Buildbox
     end
 
     def initialize(*args)
-      @options = args.last.is_a?(Hash) ? args.pop : {}
+      @options   = args.last.is_a?(Hash) ? args.pop : {}
       @arguments = args.dup
-      @logger = Buildbox.logger
+      @logger    = Buildbox.logger
     end
 
     def arguments
@@ -55,9 +55,9 @@ module Buildbox
                                 IO.pipe
                               end
 
-      process.io.stdout = write_pipe
-      process.io.stderr = write_pipe
-      process.duplex = true
+      process.io.stdout     = write_pipe
+      process.io.stderr     = write_pipe
+      process.duplex        = true
 
       # Set the environment on the process
       if @options[:environment]
@@ -66,19 +66,13 @@ module Buildbox
         end
       end
 
-      # Record the start time for timeout purposes
-      start_time = Time.now.to_i
-
-      # Track the output as it goes
-      output = ""
-
       # Start the process
       process.start
 
-      @logger.debug("Process #{arguments} started with PID: #{process.pid}")
-
       # Make sure the stdin does not buffer
       process.io.stdin.sync = true
+
+      @logger.debug("Process #{arguments} started with PID: #{process.pid}")
 
       if RUBY_PLATFORM != "java"
         # On Java, we have to close after. See down the method...
@@ -87,18 +81,28 @@ module Buildbox
         write_pipe.close
       end
 
+      # Record the start time for timeout purposes
+      start_time = Time.now.to_i
+
+      # Track the output as it goes
+      output = ""
+
+      @logger.debug("Selecting on IO")
       while true
         results = IO.select([read_pipe], nil, nil, timeout || 0.1) || []
         readers = results[0]
 
         # Check if we have exceeded our timeout
         raise TimeoutExceeded if timeout && (Time.now.to_i - start_time) > timeout
+        # Kill the process and wait a bit for it to disappear
+        # Process.kill('KILL', process.pid)
+        # Process.waitpid2(process.pid)
 
         # Check the readers to see if they're ready
         if readers && !readers.empty?
           readers.each do |r|
             # Read from the IO object
-            data = read_until_block(r)
+            data = read_io(r)
 
             # We don't need to do anything if the data is empty
             next if data.empty?
@@ -132,7 +136,7 @@ module Buildbox
       # process exited.
 
       # Read the extra data
-      extra_data = read_until_block(read_pipe)
+      extra_data = read_io(read_pipe)
 
       # If there's some that we missed
       if extra_data != ""
@@ -146,7 +150,7 @@ module Buildbox
         write_pipe.close
       end
 
-      @output = output.chomp
+      @output      = output.chomp
       @exit_status = process.exit_code
     end
 
@@ -157,7 +161,7 @@ module Buildbox
     # data.
     #
     # @return [String]
-    def read_until_block(io)
+    def read_io(io)
       data = ""
 
       while true

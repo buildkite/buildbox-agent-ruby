@@ -1,21 +1,20 @@
+require 'hashie/mash'
 require 'json'
 
 module Buildbox
-  class Configuration
-    include Buildbox::Model
-
+  class Configuration < Hashie::Mash
     def agent_access_tokens
       env_agents = ENV['BUILDBOX_AGENTS']
 
       if env_agents.nil?
-        @agent_access_tokens || []
+        self[:agent_access_tokens] || []
       else
         env_agents.to_s.split(",")
       end
     end
 
     def api_endpoint
-      endpoint = ENV['BUILDBOX_API_ENDPOINT'] || @api_endpoint || "https://agent.buildbox.io/v1"
+      endpoint = ENV['BUILDBOX_API_ENDPOINT'] || self[:api_endpoint] || "https://agent.buildbox.io/v1"
 
       # hack to update legacy endpoints
       if endpoint == "https://api.buildbox.io/v1"
@@ -28,8 +27,7 @@ module Buildbox
     end
 
     def update(attributes)
-      self.attributes = attributes
-
+      attributes.each_pair { |key, value| self[key] = value }
       save
     end
 
@@ -48,12 +46,11 @@ module Buildbox
     private
 
     def pretty_json
-      JSON.pretty_generate(:agent_access_tokens => agent_access_tokens,
-                           :api_endpoint => api_endpoint)
+      JSON.pretty_generate(self)
     end
 
     def read_and_load
-      self.attributes = JSON.parse(path.read)
+      merge! JSON.parse(path.read)
     end
 
     def path

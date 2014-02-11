@@ -1,6 +1,29 @@
+require 'faraday'
+require 'faraday_middleware'
+require 'hashie/mash'
+require 'delegate'
+
 module Buildbox
   class API
-    class AgentNotFoundError < StandardError; end
+    # Faraday uses debug to show response information, but when the agent is in
+    # DEBUG mode, it's kinda useless noise. So we use a ProxyLogger to only push
+    # the information we care about to the logger.
+    class ProxyLogger
+      def initialize(logger)
+        @logger = logger
+      end
+
+      def info(*args)
+        @logger.debug(*args)
+      end
+
+      def debug(*args)
+        # no-op
+      end
+    end
+
+    class AgentNotFoundError < Faraday::Error::ClientError; end
+    class ServerError < Faraday::Error::ClientError; end
 
     def initialize(config = Buildbox.config, logger = Buildbox.logger)
       @config = config
@@ -8,15 +31,19 @@ module Buildbox
     end
 
     def agent(access_token, options)
-      connection.request(:put, access_token, options)
-    rescue Buildbox::Connection::NotFoundError => e
-      raise AgentNotFoundError.new(e.message)
+      put(access_token, options)
+    rescue Faraday::Error::ClientError => e
+      if e.response && e.response[:status] == 404
+        raise AgentNotFoundError.new(e, e.response)
+      else
+        raise ServerError.new(e, e.response)
+      end
     end
 
     def next_build(access_token)
-      response = connection.request(:get, "#{access_token}/builds/queue/next")
+      response = get("#{access_token}/builds/queue/next")
 
-      if build = response['build']
+      if build = response.build
         Buildbox::Build.new(build)
       else
         nil
@@ -24,25 +51,56 @@ module Buildbox
     end
 
     def update_build(access_token, build, options)
-      connection.request(:put, "#{access_token}/builds/#{build.id}", options)
+      put("#{access_token}/builds/#{build.id}", options)
     end
 
     def create_artifacts(access_token, build, artifacts)
-      connection.request(:post, "#{access_token}/builds/#{build.id}/artifacts", :artifacts => artifacts.map(&:as_json))
+      post("#{access_token}/builds/#{build.id}/artifacts", :artifacts => artifacts.map(&:as_json))
     end
 
     def update_artifact(access_token, build, artifact_id, options)
-      connection.request(:put, "#{access_token}/builds/#{build.id}/artifacts/#{artifact_id}", options)
+      put("#{access_token}/builds/#{build.id}/artifacts/#{artifact_id}", options)
     end
 
     private
 
     def connection
-      @connection ||= begin
-                        ca_file = Buildbox.gem_path.join("lib", "certs", "cacert.pem").to_s
+      @connection ||= Faraday.new(:url => @config.api_endpoint,
+                                  :ssl => { :ca_file => Buildbox.gem_path.join("lib", "certs", "cacert.pem").to_s }) do |faraday|
+        faraday.request :retry
+        faraday.request :json
 
-                        Buildbox::Connection.new(@logger, @config.api_endpoint, ca_file)
-                      end
+        faraday.response :logger, ProxyLogger.new(@logger)
+        faraday.response :mashify
+
+        # JSON needs to come after mashify as it needs to run before the mashify
+        # middleware.
+        faraday.response :json
+        faraday.response :raise_error
+
+        faraday.adapter Faraday.default_adapter
+
+        # Set some sensible defaults on the adapter.
+        faraday.options[:timeout]      = 60
+        faraday.options[:open_timeout] = 60
+      end
+    end
+
+    def post(path, body = {})
+      connection.post(path) do |request|
+        request.body                    = body
+        request.headers['Content-Type'] = 'application/json'
+      end.body
+    end
+
+    def put(path, body = {})
+      connection.put(path) do |request|
+        request.body = body
+      end.body
+    end
+
+    def get(path)
+      connection.get(path).body
     end
   end
 end
