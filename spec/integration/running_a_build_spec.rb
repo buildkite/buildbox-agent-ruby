@@ -6,7 +6,7 @@ describe 'running a build' do
   let(:commit)    { "3e0c65433b241ff2c59220f80bcdcd2ebb7e4b96" }
   let(:command)   { "rspec test_spec.rb" }
   let(:env)       { { } }
-  let(:build)     { Buildbox::Build.new(:project => { :id => "test" }, :namespace => "test/test", :id => 1, :script => script, :env => env) }
+  let(:build)     { Buildbox::Build.new(:namespace => "test/test", :id => 1, :script => script, :env => env) }
   let(:runner)    { Buildbox::Runner.new(build) }
   let(:script) do
 <<-SCRIPT
@@ -19,7 +19,6 @@ fi
 git clean -fd
 git fetch -q
 git checkout -qf #{commit}
-bundle install --local
 #{command}
 SCRIPT
   end
