@@ -60,7 +60,7 @@ module Buildbox
 
           access_token = @argv.first
           new_access_tokens = Buildbox.config.agent_access_tokens + [access_token]
-          Buildbox.config.update(:agent_access_tokens => agent_access_tokens.uniq)
+          Buildbox.config.update(:agent_access_tokens => new_access_tokens.uniq)
 
           puts "Successfully added agent access token"
           puts "You can now start the agent with: buildbox agent:start."
