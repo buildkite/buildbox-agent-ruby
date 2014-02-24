@@ -5,5 +5,5 @@ set -x
 echo '--- bundling'
 bundle install
 
-echo '--- running specs'
-./bin/rspec
+echo '--- running tests'
+rake
