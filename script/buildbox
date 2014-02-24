@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+set -x
+
+echo '--- bundling'
+bundle install
+
+echo '--- running specs'
+./bin/rspec
